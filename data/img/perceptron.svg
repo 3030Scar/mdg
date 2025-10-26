@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="220" viewBox="0 0 700 220">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <!-- inputs -->
+  <g font-family="Arial" font-size="13" fill="#000">
+    <circle cx="60" cy="40" r="14" fill="#f7f7f7" stroke="#333"/>
+    <text x="54" y="45">x1</text>
+    <circle cx="60" cy="110" r="14" fill="#f7f7f7" stroke="#333"/>
+    <text x="54" y="115">x2</text>
+    <circle cx="60" cy="180" r="14" fill="#f7f7f7" stroke="#333"/>
+    <text x="54" y="185">x3</text>
+  </g>
+  <!-- arrows to sum -->
+  <g stroke="#666" stroke-width="2">
+    <line x1="78" y1="40" x2="220" y2="80" />
+    <line x1="78" y1="110" x2="220" y2="110" />
+    <line x1="78" y1="180" x2="220" y2="140" />
+  </g>
+  <!-- weights labels -->
+  <g font-family="Arial" font-size="12" fill="#333">
+    <text x="140" y="60">w1</text>
+    <text x="140" y="125">w2</text>
+    <text x="140" y="145">w3</text>
+  </g>
+  <!-- sum node -->
+  <g>
+    <rect x="220" y="70" width="120" height="80" rx="8" ry="8" fill="#fff3e0" stroke="#ff8c00"/>
+    <text x="236" y="115" font-family="Arial" font-size="14" fill="#333">Σ (w·x + b)</text>
+  </g>
+  <!-- activation -->
+  <g>
+    <line x1="340" y1="110" x2="420" y2="110" stroke="#666" stroke-width="2"/>
+    <rect x="420" y="76" width="100" height="68" rx="6" ry="6" fill="#e8f4ff" stroke="#2b7fc0"/>
+    <text x="432" y="110" font-family="Arial" font-size="14" fill="#2b7fc0">sign(z)</text>
+  </g>
+  <!-- output -->
+  <g>
+    <line x1="520" y1="110" x2="580" y2="110" stroke="#666" stroke-width="2"/>
+    <circle cx="610" cy="110" r="16" fill="#f0f0f0" stroke="#333"/>
+    <text x="603" y="115" font-family="Arial" font-size="14">ŷ</text>
+  </g>
+  <!-- bias label -->
+  <g font-family="Arial" font-size="12" fill="#333">
+    <text x="200" y="60">b</text>
+    <line x1="200" y1="64" x2="230" y2="80" stroke="#999" stroke-dasharray="3,2"/>
+  </g>
+</svg>
