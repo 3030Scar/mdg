@@ -2,7 +2,7 @@
 - CSDN、知乎、b站是大家可以接触到的比较简单也比较好用的学习资源和平台，当然也可以活用AI，综合多方资料来获取信息
 - 我们提倡每一位论文复现组的同学都应具备信息检索的能力，这一能力对我们后续学习一些挑战性概念时至关重要
 
-- 做为论文复现组，我们难免需要读到论文，除了arXiv，知网、IEEE、Web of Science这些也是优质的论文文献网站，但在这些平台上面查看论文需要收费，我们可以使用学校的账号登录，这样就不需要自己付费
+- 做为论文复现组的成员，我们难免需要读到论文，除了arXiv之外，知网、IEEE、Web of Science这些也是优质的论文文献网站，但在这些平台上面查看论文需要收费，我们可以使用学校的账号登录，这样就不需要自己付费
 - 我们可以在学校的融合门户平台 [https://info.jnu.edu.cn/](https://info.jnu.edu.cn/) -> 登录 -> 下拉至数字资源栏目 -> 选择文献网站进入
     - 知网在高校/机构搜索栏输入暨南大学选择后进入即可
     - IEEE进入默认登录学校账号
@@ -11,11 +11,14 @@
 # 我们接下来的任务：看鱼书
 - 在正式进入人工智能的相关学习前，我们需要先了解深度学习的一些基础概念，所以我们希望大家在下一次分享会前看完鱼书以下内容：
 1.5（Numpy）、1.6（Matplotlib）、2章（感知机）、3章（神经网络）、4章（神经网络的学习）、7章（卷积神经网络）
-- 如果同学没有参加上一次的分享会，或者还对我们的学习目标感到模糊，可以查看[上次分享会回顾笔记](https://papergroup.tech/markdown-viewer.html?file=%E6%8A%80%E6%9C%AF%E9%83%A8%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%88%86%E4%BA%AB%E4%BC%9A)
+这两部分很难，有能力的同学可以选择性看，我们不做要求：5章（误差反向传播法）、6章（与学习相关的技巧）
+- 如果同学没有参加上一次的分享会，或者还对我们的学习目标感到模糊，强烈建议查看[上次分享会回顾笔记](https://papergroup.tech/markdown-viewer.html?file=%E6%8A%80%E6%9C%AF%E9%83%A8%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%88%86%E4%BA%AB%E4%BC%9A)
 - 在下一次分享会时，我们会请同学分享在这个过程中学习到的深度学习概念，同时带大家再次梳理一次深度学习的整体脉络
-- 我们提倡每位同学看完鱼书后能写一份学习报告（不需要严格讲究格式），可以简单概述学习到的内容，也可以详细描述你学习的一切，上传至[论文复现提交处](https://f.wps.cn/g/ep5IgqHt/)，上传代号002
+- 我们提倡每位同学看完鱼书后能写一份学习报告（不需要严格讲究格式），可以简单概述学习到的内容，也可以详细描述你学习的一切，让我们了解大家的进度以更好地针对性教学，上传至[论文复现提交处](https://f.wps.cn/g/ep5IgqHt/)，上传代号002
 
-# Python测试题评讲
+# Python测试题评讲环节
+此份测试题用做学习与入门python，我们可以希望大家在学中做题，完成后可选择上传至提交处以获取我们的反馈，上传代号001。即使过了任务截止日期，我们依旧欢迎同学学习与练手~
+
 ## Level 1（基础级）
 
 ### 1. 文件夹里有多少图片？
@@ -50,6 +53,7 @@ print(dogQ.is_barking())  # 喂食后状态：False
 **优秀同学代码分享**
 ```python
 class Dog:
+    # 初始化方法，当创建Dog对象时会被调用
     def __init__(self,name:str):
         self.name = name
         self.barking = False
@@ -64,7 +68,7 @@ class Dog:
         self.barking = False
     
     def bark(self):
-        print(f'{self.name} is backing')
+        print(f'{self.name} is barking!') 
         self.barking = True
 ```
 
@@ -93,35 +97,48 @@ print(vec_a.add(vec_b))  # 输出：(4, 7)
 
 **优秀同学代码分享**
 ```python
+# 导入 math 模块以使用 sqrt 函数
+import math
+
 class Vector2d:
+    # 初始化二维向量
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
 
-    def __add__(self, other) -> Vector2d:
+    # 重载加法运算符 (+)，实现向量加法
+    def __add__(self, other: 'Vector2d') -> 'Vector2d':
         return Vector2d(self.x + other.x, self.y + other.y)
 
-    def add(self, other) -> Vector2d:
+    # 向量加法（成员方法版本）
+    def add(self, other: 'Vector2d') -> 'Vector2d':
         return self.__add__(other)
 
-    def __sub__(self, other) -> Vector2d:
+    # 重载减法运算符 (-)，实现向量减法
+    def __sub__(self, other: 'Vector2d') -> 'Vector2d':
         return Vector2d(self.x - other.x, self.y - other.y)
 
-    def sub(self, other) -> Vector2d:
+    # 向量减法（成员方法版本）
+    def sub(self, other: 'Vector2d') -> 'Vector2d':
         return self.__sub__(other)
 
+    # 计算向量的模长（L2范数）
     def norm(self) -> float:
         return math.sqrt(self.x * self.x + self.y * self.y)
 
-    def negate(self) -> Vector2d:
+    # 计算反向量
+    def negate(self) -> 'Vector2d':
         return Vector2d(-self.x, -self.y)
 
-    def is_perpendicular(self, other) -> bool:
+    # 判断两个向量是否垂直（点积为0）
+    def is_perpendicular(self, other: 'Vector2d') -> bool:
         return self.x * other.x + self.y * other.y == 0
 
-    def is_collinear(self, other) -> bool:
+    # 判断两个向量是否共线（叉积为0）
+    def is_collinear(self, other: 'Vector2d') -> bool:
         return self.x * other.y - self.y * other.x == 0
 
+    # 自定义对象的字符串表示形式，用于print()
     def __str__(self):
         return f"({self.x}, {self.y})"
 ```
@@ -153,13 +170,20 @@ class EBicycle :
         self.totalPower = totalPower
         self.maxSpeed = maxSpeed
         self.power = self.totalPower
+
+    # 判断能否以速度 v 行驶路程 s
     def canIMakeIt(self,v,s) :
+        # 最大里程
         maxS = (v * 0.7 * self.power)/(2 + 0.1 * v + 0.02 * v ** 2)
+        
+        # 目标路程小于等于最大里程
         if s <= maxS :
-            self.power = (maxS * (2 + 0.1 * v + 0.02 * v ** 2)) / (v * 0.7)
-            print(self.power)
+            consumed_power = s * (2 + 0.1 * v + 0.02 * v ** 2) / (v * 0.7)
+            self.power -= consumed_power
+            print(f"行驶后剩余电量: {self.power}")
         else :
             print("无法以该速度到达目的地！")
+
     def charge(self) :
         self.power = self.totalPower
 ```
@@ -170,10 +194,10 @@ class EBicycle :
 
 **需求**：实现 `Math` 类，通过**静态方法**封装以下数学工具功能（可以无需实例化，直接通过类调用）：
 
-- 求算术平方根（sqrt）
+- 求算术平方根（sqrt） -> 这可以直接pow或**，也能使用牛顿迭代法（更高效）、二分法实现
 - 求绝对值（abs）
 - 上取整（ceil）
-- 下取整（floor）
+- 下取整（floor） -> 注意需要考虑负数值得向下取整情况，不能直接int(x)
 - 四舍五入取整（round）
 - 幂运算（fastpow，要求使用快速幂算法实现，而不是使用编程语言自带或库中的的pow()函数，只需要实现正整数的快速幂运算即可）
 
@@ -212,37 +236,27 @@ print(Math.fastpow(3, 10))  # 输出：59049
 
 > 提示：判断一个数是奇数还是偶数，可以用 `n % 2` 来判断（余数为1则为奇数）
 
-**优秀同学代码分享**
+**快速幂示例代码**
 ```python
-class Math:
-    def sqrt(x):
-        if x < 0:
-            raise ValueError('负数不能开平方根')
-        return x ** 0.5
+def ddpow(x,n): # 用迭代形式实现
+    res = 1
+    while n>0:
+        if n & 1:
+            res *= x
+        x *= x
+        n >>= 1
+    return res
+
+def dgpow(x,n): # 用递归形式实现
+    if n==0:
+        return 1
     
-    def abs(x):
-        if x < 0:
-            return -x
-        return x
-    
-    def ceil(x):
-        return int(x) + 1
-    
-    def floor(x):
-        return int(x)
-    
-    def round(x):
-        return int(x + 0.5)
-    
-    def fastpow(x, n): 
-        #代码思路可以
-        result = 1
-        while n > 0:
-            if n % 2 == 1:
-                result *= x
-            x *= x
-            n //= 2
-        return result
+    if n & 1:
+        half = dgpow(x,n//2)
+        return half * half * x
+    else:
+        half = dgpow(x,n//2)
+        return half * half
 ```
 
 ### 2. 阅读理解 - MLP计算
@@ -280,14 +294,14 @@ class Layer:
         """
         n：本层的神经元数量
         """
-        self.neurons = [0 for i in range(n)]
-        self.n = n
-        pass
+        self.neurons = [0 for i in range(n)] # 初始化该层所有神经元的值为0
+        self.n = n # 记录神经元数量
+        pass # pass主要用于占位，但此处是多余的，可以舍弃
 
-    def __str__(self):
+    def __str__(self):  # 定义当打印Layer对象时输出的内容
         return str(self.neurons)
     
-    def __repr__(self):
+    def __repr__(self):  # 定义在交互式环境中直接输出Layer对象时显示的内容
         return self.__str__()
 
 class MLP:
@@ -295,27 +309,41 @@ class MLP:
         """
         weights：权重，一个三维数组，其中weights[a][b][c] = w[a+1,b+1,c+1]
         """
+        # 神经网络的层列表
         self.layers:list[Layer] = list() 
+        # 权重列表
         self.weights:list[list[list[float]]] = list() if weights is None else weights
         pass
 
     def calculate(self,*inputs): # ** 使用打包/解包操作 **
+        # 将输入值赋给输入层（第0层）的神经元
         self.layers[0].neurons = inputs
+        # 遍历隐藏层和输出层，计算每个神经元的值
+        # last_layer_index 是当前处理层的前一层的索引
         for last_layer_index,layer in enumerate(self.layers[1:]):
             last_layer = self.layers[last_layer_index]
+            # 遍历当前层的每一个神经元
             for neuron_index in range(layer.n):
                 res = 0
+                # 计算加权和：前一层所有神经元的值与对应权重的乘积之和
                 for last_neuron_index,last_neuron in enumerate(last_layer.neurons):
                     res += self.weights[last_layer_index][last_neuron_index][neuron_index] * last_neuron
+                # 更新当前神经元的值
                 layer.neurons[neuron_index] = res
+        # 返回输出层（最后一层）
         return self.layers[-1]
     pass
 
+# 此处同学代码有点小问题，我们帮助他进行了修正
 def load_mlp_from_weights(weights:list[list[list[float]]]) -> MLP:
     mlp = MLP(weights)
-    for layer_list in weights:
-        mlp.layers.append(Layer(len(layer_list)))
-    mlp.layers.append(Layer(len(weights[-1][0])))   
+    # 创建输入层
+    num_input_neurons = len(weights[0])
+    mlp.layers.append(Layer(num_input_neurons))
+    # 隐藏层和输出层
+    for weight_group in weights:
+        num_dest_neurons = len(weight_group[0])
+        mlp.layers.append(Layer(num_dest_neurons))
     return mlp
 
 test_weights = [
@@ -355,9 +383,13 @@ class Solution:
         if n == 1: return 1
         if n == 2: return 2
         else:
-            for i in range(n - 2):
+            for i in range(n - 2): # 直接使用斐波那契递推法
                 a,b = b,a+b
         return b
+'''
+实际上这就是一个f(n)=f(n-1)+f(n-2)的问题，我们只需要求出斐波那契数列前n项和即可解决问题
+当然也有同学使用组合数学法及递归法（不建议）实现此问题，大家可以自行了解
+'''
 ```
 
 ## Level 3（挑战级）
@@ -417,6 +449,8 @@ n=int(input())
 x=map(int,input().split(" "))
 x=sorted(x)
 xx=[]
+# 贪心策略：每次都从当前剩余的石头中，交替取出最大和最小的高度，
+# 放入路径中，以实现最大跳跃差。
 while len(x)>1:
     xx+=[x[-1],x[0]]
     x=x[1:-1] # ** 删除列表头尾的方式很优雅 **
@@ -442,7 +476,10 @@ print(ans)
 
 **输出格式**：一行整数（两次取数的最大总和）。
 
-**题解代码**
+**关于动态规划问题**：我们建议解决这类问题优先使用迭代法。虽然它与记忆化递归的时间复杂度相同，但迭代法避免了函数调用的额外开销和栈溢出的风险，通常在实际运行中效率更高。同学可以自行去了解时间复杂度的概念。
+可以观看[这个视频](https://www.bilibili.com/video/BV1AB4y1w7eT/?share_source=copy_web&vd_source=2ce9574f7e97cdd1f936211a10045041)快速了解动态规划
+
+**题解代码（使用迭代法）**
 ```python
 from math import inf
 import sys
@@ -490,4 +527,44 @@ for x, y, v in zip(it, it, it):
         break
     grid[x][y] = v
 print(max_pick_sum(grid))
-    ```
+```
+
+**参考代码（使用递归法）**
+```python
+def dfs(x1,y1,x2,y2):
+
+    if x1 >= N or y1 >=N or x2 >= N or y2 >= N:
+        return float('-inf')
+
+    if x1 == N-1 and y1 == N-1 and x2 == N-1 and y2 == N-1:
+        return grid[N-1][N-1]
+
+    state = (x1,y1,x2,y2)
+
+    if state in dp:
+        return dp[state]
+
+    crt_score = grid[x1][y1]
+    if (x1,y1) != (x2,y2):
+        crt_score += grid[x2][y2]
+
+    max_future = max(
+        dfs(x1+1 , y1 , x2+1 , y2),
+        dfs(x1+1 , y1 , x2 , y2+1),
+        dfs(x1 , y1+1 , x2+1 , y2),
+        dfs(x1 , y1+1 , x2 , y2+1)
+        )
+    dp[state] = crt_score + max_future
+    return dp[state]
+
+N = int(input())
+grid = [[0 for _ in range(N)] for _ in range(N)]
+dp = {}
+while True:
+    x, y, value = map(int,input().split())
+    if x == 0 and y == 0 and value == 0:
+        break
+    grid[x-1][y-1] = value
+
+print(dfs(0,0,0,0))
+```
