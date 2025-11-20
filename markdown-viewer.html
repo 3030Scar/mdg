@@ -89,9 +89,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #0a0e27;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-            background-attachment: fixed;
+            /* 移除body上的背景设置，改用.particles div实现，解决iOS兼容性问题 */
+            background-color: transparent;
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
@@ -101,7 +100,7 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* 背景动画粒子 */
+        /* 背景动画粒子 - 同时作为背景层 */
         .particles {
             position: fixed;
             top: 0;
@@ -111,6 +110,9 @@
             pointer-events: none;
             overflow: hidden;
             z-index: -1;
+            /* 将背景样式移至此处 */
+            background: #0a0e27;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
         }
 
         .particle {
