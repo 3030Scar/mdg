@@ -1,0 +1,2328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能基座技术部 - 论文复现组</title>
+    <link rel="icon" type="image/png" href="./img/mdg_logo.png">
+    <link rel="shortcut icon" type="image/png" href="./img/mdg_logo.png">
+    <link rel="apple-touch-icon" href="./img/mdg_logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00d4ff;
+            --secondary-color: #ff00ff;
+            --accent-color: #7c3aed;
+            --bg-dark: #0a0e27;
+            --bg-card: rgba(20, 25, 47, 0.8);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0e27;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            opacity: 0;
+            animation: pageLoad 0.8s ease-out forwards;
+        }
+
+        @keyframes pageLoad {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* 背景动画粒子 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .particle.hover {
+            width: 4px;
+            height: 4px;
+            opacity: 0.8;
+            background: var(--secondary-color);
+            box-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) translateX(0);
+            }
+            to {
+                transform: translateY(-100px) translateX(100px);
+            }
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .logo img:hover {
+            filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.8));
+            transform: scale(1.1) rotate(1deg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            position: relative;
+            transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 卡片样式 */
+        .section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 100px; /* 定位偏移 */
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section-title.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            background: rgba(20, 25, 47, 0.8);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .card.visible {
+            animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 从左侧滑入动画 */
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* 从右侧滑入动画 */
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* 放大淡入动画 */
+        .scale-in {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scale-in.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* 网格项交错动画 */
+        .grid > * {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .grid > *.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.02), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        /* 联系方式卡片 */
+        .contact-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .contact-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* 资源下载区 */
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            gap: 1rem;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .resource-item.visible {
+            animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideInFromLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .resource-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+        }
+
+        /* 资源项文本内容 */
+        .resource-item > div:first-child {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* 按钮容器，包裹所有按钮 */
+        .resource-item > a.download-btn,
+        .resource-item > .download-btn {
+            opacity: 0;
+            transform: translateX(-10px);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        /* 鼠标悬停时显示按钮 */
+        .resource-item:hover > a.download-btn,
+        .resource-item:hover > .download-btn {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        /* 为多个按钮添加延迟效果 */
+        .resource-item > a.download-btn:nth-of-type(2) {
+            transition-delay: 0.05s;
+        }
+
+        .resource-item > a.download-btn:nth-of-type(3) {
+            transition-delay: 0.1s;
+        }
+
+        .download-btn {
+            padding: 0.5rem 1.2rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* 确保悬停在按钮上时保持缩放效果 */
+        .resource-item:hover .download-btn:hover {
+            transform: translateX(0) scale(1.05) !important;
+        }
+
+        /* 资源容器 - 可展开收起 */
+        .resource-container {
+            position: relative;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 折叠状态高度 */
+        .resource-container.collapsed { 
+            max-height: 450px;
+        }
+
+        .resource-container.expanded {
+            max-height: 3000px;
+        }
+
+        /* 资源渐变遮罩 */
+        .resource-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(20, 25, 47, 0.5) 30%,
+                rgba(20, 25, 47, 0.8) 60%,
+                var(--bg-card) 100%);
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        .resource-container.expanded .resource-fade {
+            opacity: 0;
+        }
+
+        /* 资源展开/收起按钮 */
+        .resource-toggle {
+            position: relative;
+            margin-top: 2rem;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .resource-toggle-btn {
+            padding: 0.8rem 2.5rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid var(--accent-color);
+            border-radius: 50px;
+            color: var(--accent-color);
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 0 20px rgba(124, 58, 237, 0.3),
+                inset 0 0 20px rgba(124, 58, 237, 0.1);
+        }
+
+        .resource-toggle-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.2s ease;
+        }
+
+        .resource-toggle-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .resource-toggle-btn:hover {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            box-shadow: 
+                0 0 30px rgba(124, 58, 237, 0.5),
+                0 0 50px rgba(255, 0, 255, 0.3),
+                inset 0 0 30px rgba(124, 58, 237, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .resource-toggle-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 0 20px rgba(124, 58, 237, 0.6),
+                inset 0 0 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .resource-toggle-btn .btn-text {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .resource-toggle-btn .btn-icon {
+            display: inline-block;
+            transition: transform 0.4s ease;
+            font-size: 1.1rem;
+        }
+
+        .resource-container.expanded ~ .resource-toggle .resource-toggle-btn .btn-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 资源按钮呼吸动画 */
+        @keyframes pulse-border-purple {
+            0%, 100% {
+                box-shadow: 
+                    0 0 18px rgba(124, 58, 237, 0.25),
+                    0 0 30px rgba(255, 0, 255, 0.1),
+                    inset 0 0 18px rgba(124, 58, 237, 0.08);
+            }
+            25% {
+                box-shadow: 
+                    0 0 24px rgba(124, 58, 237, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(124, 58, 237, 0.15);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(124, 58, 237, 0.5),
+                    0 0 50px rgba(255, 0, 255, 0.3),
+                    inset 0 0 30px rgba(124, 58, 237, 0.2);
+            }
+            75% {
+                box-shadow: 
+                    0 0 24px rgba(124, 58, 237, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(124, 58, 237, 0.15);
+            }
+        }
+
+        .resource-container.collapsed ~ .resource-toggle .resource-toggle-btn {
+            animation: pulse-border-purple 4s ease-in-out infinite;
+        }
+
+        /* 重要网址 */
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .link-item {
+            padding: 1.5rem;
+            background: rgba(124, 58, 237, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-primary);
+            border: 1px solid transparent;
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+        }
+
+        .link-item.visible {
+            animation: scaleInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes scaleInBounce {
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .link-item:hover {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: var(--accent-color);
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        .link-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 学习路线 */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid var(--primary-color);
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -44px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            border: 3px solid var(--bg-dark);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s;
+        }
+
+        .timeline-item.visible::before {
+            transform: translateY(-50%) scale(1);
+        }
+
+        .timeline-date {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 时间轴容器 - 可展开收起 */
+        .timeline-container {
+            position: relative;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timeline-container.collapsed {
+            max-height: 400px;
+        }
+
+        .timeline-container.expanded {
+            max-height: 5000px;
+        }
+
+        /* 渐变遮罩 */
+        .timeline-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(20, 25, 47, 0.5) 30%,
+                rgba(20, 25, 47, 0.8) 60%,
+                var(--bg-card) 100%);
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        .timeline-container.expanded .timeline-fade {
+            opacity: 0;
+        }
+
+        /* 展开/收起按钮 */
+        .timeline-toggle {
+            position: relative;
+            margin-top: 2rem;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .toggle-btn {
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.3),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        .toggle-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.2s ease;
+        }
+
+        .toggle-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            box-shadow: 
+                0 0 30px rgba(0, 212, 255, 0.5),
+                0 0 50px rgba(255, 0, 255, 0.3),
+                inset 0 0 30px rgba(0, 212, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .toggle-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.6),
+                inset 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .toggle-btn .btn-text {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-btn .btn-icon {
+            display: inline-block;
+            transition: transform 0.4s ease;
+            font-size: 1.2rem;
+        }
+
+        .timeline-container.expanded ~ .timeline-toggle .toggle-btn .btn-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 路线按钮呼吸动画 */
+        @keyframes pulse-border {
+            0%, 100% {
+                box-shadow: 
+                    0 0 18px rgba(0, 212, 255, 0.25),
+                    0 0 30px rgba(255, 0, 255, 0.1),
+                    inset 0 0 18px rgba(0, 212, 255, 0.08);
+            }
+            25% {
+                box-shadow: 
+                    0 0 24px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(0, 212, 255, 0.15);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(0, 212, 255, 0.5),
+                    0 0 50px rgba(255, 0, 255, 0.3),
+                    inset 0 0 30px rgba(0, 212, 255, 0.2);
+            }
+            75% {
+                box-shadow: 
+                    0 0 24px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 24px rgba(0, 212, 255, 0.15);
+            }
+        }
+
+        .timeline-container.collapsed ~ .timeline-toggle .toggle-btn {
+            animation: pulse-border 4s ease-in-out infinite;
+        }
+
+        /* 学期分割线 */
+        .semester-divider {
+            position: relative;
+            margin: 3rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), var(--secondary-color), transparent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .divider-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .divider-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-radius: 50px;
+            border: 0px solid;
+            border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color)) 1;
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.3),
+                0 0 40px rgba(255, 0, 255, 0.2),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 20px rgba(0, 212, 255, 0.3),
+                    0 0 40px rgba(255, 0, 255, 0.2),
+                    inset 0 0 20px rgba(0, 212, 255, 0.1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(0, 212, 255, 0.5),
+                    0 0 60px rgba(255, 0, 255, 0.4),
+                    inset 0 0 30px rgba(0, 212, 255, 0.2);
+            }
+        }
+
+        .divider-icon {
+            font-size: 1.5rem;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .divider-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .semester-end {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .semester-start {
+            font-size: 1.1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: textGradient 3s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes textGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 通知栏 */
+        .notification {
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(0, 212, 255, 0.1));
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary-color);
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notification.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 5px rgba(255, 0, 255, 0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            /* 导航栏适配 */
+            .nav-container {
+                flex-direction: column;
+                gap: 0.8rem;
+                padding: 0.5rem 15px;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+                text-align: center;
+            }
+
+            .logo img {
+                width: 32px;
+                height: 32px;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .nav-links li {
+                margin: 0;
+            }
+
+            /* Hero区域适配 */
+            .hero {
+                padding: 2rem 0;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+                padding: 0 10px;
+            }
+
+            /* 主内容区适配 */
+            .main-content {
+                margin-top: 140px;
+                padding: 1.5rem 15px;
+            }
+
+            /* 标题适配 */
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .section-title::before {
+                height: 24px;
+            }
+
+            /* 卡片适配 */
+            .card {
+                padding: 1.5rem;
+                border-radius: 12px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            /* 联系卡片适配 */
+            .contact-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+            }
+
+            .contact-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            /* 资源项适配 */
+            .resource-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+                padding: 1rem;
+            }
+
+            .resource-item > div:first-child {
+                width: 100%;
+            }
+
+            /* 按钮始终显示在移动端 */
+            .resource-item > a.download-btn,
+            .resource-item > .download-btn {
+                opacity: 1;
+                transform: translateX(0);
+                pointer-events: auto;
+                width: 100%;
+                text-align: center;
+                padding: 0.6rem 1rem;
+            }
+
+            .download-btn {
+                font-size: 0.85rem;
+            }
+
+            /* 资源容器高度调整 */
+            .resource-container.collapsed {
+                max-height: 500px;
+            }
+
+            .resource-fade {
+                height: 150px;
+            }
+
+            /* 展开/收起按钮适配 */
+            .resource-toggle-btn,
+            .toggle-btn {
+                padding: 0.7rem 1.8rem;
+                font-size: 0.85rem;
+                letter-spacing: 1px;
+            }
+
+            .resource-toggle-btn .btn-icon,
+            .toggle-btn .btn-icon {
+                font-size: 1rem;
+            }
+
+            /* 重要网址网格适配 */
+            .link-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+
+            .link-item {
+                padding: 1rem;
+            }
+
+            .link-icon {
+                font-size: 1.5rem;
+            }
+
+            .link-item h4 {
+                font-size: 0.9rem;
+            }
+
+            .link-item p {
+                font-size: 0.75rem;
+            }
+
+            /* 时间轴适配 */
+            .timeline {
+                padding-left: 25px;
+            }
+
+            .timeline::before {
+                left: 5px;
+            }
+
+            .timeline-item {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .timeline-item::before {
+                left: -32px;
+                width: 16px;
+                height: 16px;
+            }
+
+            .timeline-date {
+                font-size: 0.9rem;
+            }
+
+            .timeline-item h4 {
+                font-size: 1rem;
+            }
+
+            .timeline-item p {
+                font-size: 0.85rem;
+            }
+
+            .timeline-container.collapsed {
+                max-height: 350px;
+            }
+
+            .timeline-fade {
+                height: 150px;
+            }
+
+            /* 学期分割线适配 */
+            .semester-divider {
+                margin: 2rem 0;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .divider-line {
+                width: 100%;
+                height: 1px;
+            }
+
+            .divider-content {
+                padding: 0.8rem 1.2rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .divider-icon {
+                font-size: 1.2rem;
+            }
+
+            .semester-end,
+            .semester-start {
+                font-size: 0.85rem;
+            }
+
+            /* 通知栏适配 */
+            .notification {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .notification-badge {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.6rem;
+            }
+
+            /* 卡片标题适配 */
+            .card h3 {
+                font-size: 1.1rem;
+            }
+
+            .card h4 {
+                font-size: 1rem;
+            }
+
+            .card p {
+                font-size: 0.9rem;
+            }
+
+            /* 粒子效果在移动端减少数量 */
+            .particle {
+                display: none;
+            }
+
+            .particle:nth-child(-n+50) {
+                display: block;
+            }
+        }
+
+        /* 小屏手机适配 (< 480px) */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .card {
+                padding: 1.2rem;
+            }
+
+            .link-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .resource-toggle-btn,
+            .toggle-btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.8rem;
+            }
+
+            .timeline {
+                padding-left: 20px;
+            }
+
+            .timeline-item {
+                padding: 0.8rem;
+            }
+
+            .divider-content {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                margin-top: 100px;
+            }
+
+            .hero {
+                padding: 1.5rem 0;
+            }
+
+            .nav-container {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .nav-links {
+                flex-wrap: nowrap;
+                gap: 1rem;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar:hover {
+            width: 14px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        ::-webkit-scrollbar-track:hover {
+            background: linear-gradient(180deg, rgba(10, 14, 39, 0.8), rgba(26, 31, 58, 0.9));
+            box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00e5ff, #ff1493);
+            box-shadow: 
+                0 0 15px rgba(0, 212, 255, 0.6),
+                0 0 25px rgba(255, 0, 255, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.8),
+                0 0 30px rgba(255, 0, 255, 0.6),
+                inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            transform: scale(1.15);
+        }
+
+        /* 滚动条角落 */
+        ::-webkit-scrollbar-corner {
+            background: var(--bg-dark);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子效果 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="./img/mdg_logo.png" alt="MDG Logo">
+                智能基座技术部 - 论文复现组
+            </div>
+            <ul class="nav-links">
+                <li><a href="#about">简介</a></li>
+                <li><a href="#notices">通知</a></li>
+                <li><a href="#resources">资源</a></li>
+                <li><a href="#url">网址</a></li>
+                <li><a href="#meetings">回顾</a></li>
+                <li><a href="#roadmap">大纲</a></li>
+                <li><a href="#others">其他</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>论文复现组 2025级</h1>
+            <p>探索人工智能前沿 · 复现经典论文 · 构建学术基础</p>
+        </section>
+
+        <!-- 简介和联系方式 -->
+        <section id="about" class="section">
+            <h2 class="section-title">关于我们</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📚 组织简介</h3>
+                    <p style="line-height: 1.8;">论文复现组主要研读和复现人工智能领域的经典论文，一起讨论、交流学术内容，也会适当地发散式探索人工智能领域其他技术，适合自学能力强、想打下人工智能研究基础的同学。</p>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">论文复现组专注于深度学习、强化学习、计算机视觉等前沿领域，通过实践加深理论理解。</p>
+                </div>
+                <div class="card contact-card">
+                    <div class="contact-avatar">李</div>
+                    <div>
+                        <h3 style="color: var(--primary-color);">📟 联系我们</h3>
+                        <p>邮件 : ethan@stu2024.jnu.edu.cn</p>
+                        <p>微信 : _Fish890</p>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">我们欢迎任何人来旁听学习，即使你不在论文复现组</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 通知 -->
+        <section id="notices" class="section">
+            <h2 class="section-title">最新通知</h2>
+            <div class="card">
+                <div class="notification">
+                    <span class="notification-badge">重要</span>
+                    <strong>加入智能基座社团</strong>
+                    <p style="margin-top: 0.5rem;">请大家登陆社团网站注册账号【重点：用户名请实名，用自己的名字】，注册完成后请在个人页面的“一句话简介”里面写上自己的title，如“活动部成员”，认证那里可以使用校园卡，完成后大家在群里接龙~</p>
+                    <p style="margin-top: 0.5rem;"><a href="https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/%E6%99%BA%E8%83%BD%E5%9F%BA%E5%BA%A7%E7%A4%BE%E5%9B%A2%E5%8A%A0%E5%85%A5%E6%8C%87%E5%8D%97.pdf" style="color: var(--primary-color);" target="_blank">下载社团加入指南</a>，并跟随指引操作</p>
+                    <p style="margin-top: 0.5rem;">你可以<a href="https://edu.hicomputing.huawei.com/zh/group" style="color: var(--primary-color);" target="_blank">点这里</a>查看社团网站</p> 
+                </div>
+                <div class="notification">
+                    <span class="notification-badge">可选作业</span>
+                    <strong>论文复现组测试题</strong>
+                    <ul style="list-style: none; padding-left: 0; line-height: 2;">
+                    <p style="margin-top: 0.5rem;">用做学习与入门python，我们可以希望大家在学中做题，完成后可选择上传至提交处以获取我们的反馈，上传代号001</p>
+                    <li>即使过了任务截止日期，我们依旧欢迎同学学习与练手</li>
+                    <li>你可以在线点开 <a href="markdown-viewer.html?file=py_test" style="color: var(--primary-color);">题目详细</a></li>
+                    <li>或者你也可以直接 <a href="https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/py_test_dol.md" style="color: var(--primary-color);" target="_blank">下载题目</a>，下载者应当自备查看markdown的工具（vscode、notion等）</li>
+                    <li>我们已经在10.26分享会评讲了测试题，你可以查看 <a href="markdown-viewer.html?file=2nd_metting" style="color: var(--primary-color);">分享会回顾笔记</a></li>
+                    </ul>
+                </div>
+                <div class="notification">
+                    <span class="notification-badge">组内成员任务</span>
+                    <strong>完成手写数据集识别</strong>
+                    <ul style="list-style: none; padding-left: 0; line-height: 2;">
+                        <p style="margin-top: 0.5rem;">由于为期两周体测（11.15、11.16、11.22、11.23），技术部会对应地暂停两周的分享会活动，所以同学有充足的时间吸收我们之前讲过的知识，并完成之前未完成的任务。</p>
+                        <li>未看完鱼书的同学可回看<a href="markdown-viewer.html?file=2nd_metting" style="color: var(--primary-color);">论文复现组第一次分享会回顾</a>布置的任务，对应地完成</li>
+                        <li>还未写VGG论文阅读报告的同学可回看<a href="markdown-viewer.html?file=3rd_metting" style="color: var(--primary-color);">第二次分享会回顾</a>布置的任务，对应地完成</li>
+                        <li style="margin-top: 1rem;"><strong>本次任务：</strong>通过MNIST手写数字数据集来自己写一个数据读取/预处理脚本，并自己搭建一个CNN来完成对数据的训练与预测</li>
+                        <li>要求1：自定义模型类，继承自nn.Module，实现__init__()和forward()方法</li>
+                        <li>要求2：使用自己写的脚本处理后的数据作为模型输入</li>
+                        <li>要求3：建议把预处理脚本及模型代码分为两个.py文件</li>
+                        <li><a href="https://usertshu.github.io/papersreplication.github.io/files/MNIST.zip" style="color: var(--primary-color);" target="_blank">MNIST数据集下载</a></li>
+                        <li>任务详细内容可进入<a href="markdown-viewer.html?file=4th_metting" style="color: var(--primary-color);">第三次分享会回顾笔记</a>查看</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 资源栏目 -->
+        <section id="resources" class="section">
+            <h2 class="section-title">资源栏目</h2>
+            <div class="card">
+                <div class="resource-container collapsed" id="resourceContainer">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">📁 论文与代码</h3>
+                    <div class="resource-item">
+                        <div>
+                            <strong>Very Deep Convolutional Networks for Large-Scale Image Recognition</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Visual Geometry Group（VGG）提出的论文</p>
+                        </div>
+                        <a href="https://arxiv.org/abs/1409.1556" class="download-btn" target="_blank">查看</a>
+                        <a href="https://noahsnail.com/2017/08/17/2017-08-17-VGG%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%E2%80%94%E2%80%94%E4%B8%AD%E6%96%87%E7%89%88/" class="download-btn" target="_blank">中译版</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>MNIST数据集</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">手写数字识别数据集</p>
+                        </div>
+                        <a href="https://usertshu.github.io/papersreplication.github.io/files/MNIST.zip" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>Deep Residual Learning for Image Recognition</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Resnet - 残差神经网络</p>
+                        </div>
+                        <a href="https://arxiv.org/abs/1512.03385" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>You Only Look Once</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">YOLO 算法族</p>
+                        </div>
+                        <a href="https://arxiv.org/abs/1506.02640" class="download-btn" target="_blank">yolo v1</a>
+                        <a href="https://arxiv.org/abs/1612.08242" class="download-btn" target="_blank">yolo v2</a>
+                    </div>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem; margin-top: 2rem;">📖 推荐书籍</h3>
+                    <div class="resource-item">
+                        <div>
+                            <strong>《深度学习入门:基于python的理论与实现》</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">深度学习入门，咱们简称鱼书</p>
+                        </div>
+                        <a href="https://usertshu.github.io/papersreplication.github.io/files/%E9%B1%BC%E4%B9%A6.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>《白话强化学习与PyTorch》</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">强化学习入门</p>
+                        </div>
+                        <a href="https://yun.weicheng.men/Book/%E7%99%BD%E8%AF%9D%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%E4%B8%8EPyTorch.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>《EasyRL》</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">以更深入的角度入门强化学习</p>
+                        </div>
+                        <a href="https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/EasyRL_v1.0.6.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>《Python数据分析从入门到实践》</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Python数据分析从入门到实践</p>
+                        </div>
+                        <a href="https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/Python%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%AE%9E%E8%B7%B5.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem; margin-top: 2rem;">📑 其他资源</h3>
+                    <div class="resource-item">
+                        <div>
+                            <strong>130道python练习题</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">130道python练习题</p>
+                        </div>
+                        <a href="https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/130%E9%81%93python%E7%BB%83%E4%B9%A0%E9%A2%98.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>conda命令参考资料</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">conda命令参考资料</p>
+                        </div>
+                        <a href="https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/conda%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99.pdf" class="download-btn" target="_blank">下载</a>
+                    </div>
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem; margin-top: 2rem;">🧭 优秀博客与指南</h3>
+                    <div class="resource-item">
+                        <div>
+                            <strong>Dive Into Deep Learning</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">动手学深度学习</p>
+                        </div>
+                        <a href="https://zh-v2.d2l.ai/chapter_preface/index.html#" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>OpenAI Spinning Up</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">强化学习OpenAI优化策略</p>
+                        </div>
+                        <a href="https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>李沐：动手学深度学习</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">李沐：动手学深度学习</p>
+                        </div>
+                        <a href="https://www.bilibili.com/video/BV1if4y147hS/?spm_id_from=333.999.0.0" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-item">
+                        <div>
+                            <strong>吴恩达深度学习</strong>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">吴恩达深度学习</p>
+                        </div>
+                        <a href="https://www.bilibili.com/video/BV11H4y1F7uH/?spm_id_from=333.337.search-card.all.click&vd_source=319e14c34f31cf3b9f5b3e554c92ce92" class="download-btn" target="_blank">查看</a>
+                    </div>
+                    <div class="resource-fade"></div>
+                </div>
+                <div class="resource-toggle">
+                    <button class="resource-toggle-btn" id="resourceToggleBtn" onclick="toggleResource()">
+                        <span class="btn-text">
+                            <span id="resourceBtnText">展开全部资源</span>
+                            <span class="btn-icon">▼</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 重要网址 -->
+        <section class="section" id="url">
+            <h2 class="section-title">重要网址</h2>
+            <div class="card">
+                <div class="link-grid">
+                    <a href="https://www.kaggle.com" target="_blank" class="link-item">
+                        <div class="link-icon">🏆</div>
+                        <h4>Kaggle</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">数据科学竞赛平台</p>
+                    </a>
+                    <a href="https://arxiv.org" target="_blank" class="link-item">
+                        <div class="link-icon">📄</div>
+                        <h4>arXiv</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">论文预印本库</p>
+                    </a>
+                    <a href="https://github.com" target="_blank" class="link-item">
+                        <div class="link-icon">💻</div>
+                        <h4>GitHub</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">全球最大代码托管平台</p>
+                    </a>
+                    <a href="https://huggingface.co" target="_blank" class="link-item">
+                        <div class="link-icon">🤗</div>
+                        <h4>Hugging Face</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">模型与数据集</p>
+                    </a>
+                    <a href="https://paperswithcode.com" target="_blank" class="link-item">
+                        <div class="link-icon">📊</div>
+                        <h4>Papers with Code</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">论文代码实现</p>
+                    </a>
+                    <a href="https://colab.research.google.com" target="_blank" class="link-item">
+                        <div class="link-icon">☁️</div>
+                        <h4>Google Colab</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">免费GPU资源</p>
+                    </a>
+                    </a>
+                    <a href="https://ide.cloud.tencent.com/" target="_blank" class="link-item">
+                        <div class="link-icon">♾️</div>
+                        <h4>Cloud Studio</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">免费算力+WebIDE</p>
+                    </a>
+                    </a>
+                    <a href="https://leetcode.cn/" target="_blank" class="link-item">
+                        <div class="link-icon">📃</div>
+                        <h4>LeetCode</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">代码刷题平台</p>
+                    </a>
+                    <a href="https://www.luogu.com.cn/" target="_blank" class="link-item">
+                        <div class="link-icon">🧬</div>
+                        <h4>洛谷</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">代码刷题平台</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分享会回顾 -->
+        <section id="meetings" class="section">
+            <h2 class="section-title">分享会回顾</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年10月18日</h3>
+                    <h4>主题：智能基座成立大会</h4><br>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📝 <a href="markdown-viewer.html?file=智能基座成立大会" style="color: var(--primary-color);">查看详细</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年10月19日</h3>
+                    <h4>主题：技术部第一次分享会</h4><br>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📝 <a href="markdown-viewer.html?file=1st_metting" style="color: var(--primary-color);">查看详细</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年10月26日</h3>
+                    <h4>主题：论文复现组第一次分享会</h4><br>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📝 <a href="markdown-viewer.html?file=2nd_metting" style="color: var(--primary-color);">查看详细</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年11月2日</h3>
+                    <h4>主题：论文复现组第二次分享会</h4><br>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📝 <a href="markdown-viewer.html?file=3rd_metting" style="color: var(--primary-color);">查看详细</a></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年11月2日</h3>
+                    <h4>主题：论文复现组第三次分享会</h4><br>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li>📝 <a href="markdown-viewer.html?file=4th_metting" style="color: var(--primary-color);">查看详细</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习路线 -->
+        <section id="roadmap" class="section">
+            <h2 class="section-title">学习路线</h2>
+            <div class="card">
+                <div class="timeline-container collapsed" id="timelineContainer">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                        <div class="timeline-date">第7-8周：基础准备</div>
+                        <h4>Python与深度学习</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第9周：卷积神经网络</div>
+                        <h4>VGG与MNIST</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第10周：数据科学回归分析</div>
+                        <h4>学习神经网络回归模型</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第11-12周：“残差”与卷积</div>
+                        <h4>学习Resnet及其变体、了解更多卷积</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第13-16周：yolo家族</div>
+                        <h4>yolo v1 - v8</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">寒假：强化学习基础</div>
+                        <h4>pytorch与强化学习</h4>
+                    </div>
+                    <!-- 学期分割线 -->
+                    <div class="semester-divider">
+                        <div class="divider-line"></div>
+                        <div class="divider-content">
+                            <div class="divider-icon">✨</div>
+                            <div class="divider-text">
+                                <span class="semester-end">第一学期结束</span>
+                                <span class="semester-start">第二学期开始</span>
+                            </div>
+                            <div class="divider-icon">🚀</div>
+                        </div>
+                        <div class="divider-line"></div>
+                    </div>
+                    <!-- 第二学期 -->
+                    <div class="timeline-item">
+                        <div class="timeline-date">第1周：内容回顾</div>
+                        <h4>深度学习与强化学习</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第2-3周：强化学习算法</div>
+                        <h4>经典且常用的算法</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第4周：强化学习实践</div>
+                        <h4>强化学习实践项目</h4>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">第5-8周：大语言模型入门</div>
+                        <h4>nlp与llm</h4>
+                    </div>
+                </div>
+                <div class="timeline-fade"></div>
+            </div>
+            <div class="timeline-toggle">
+                <button class="toggle-btn" id="toggleBtn" onclick="toggleTimeline()">
+                    <span class="btn-text">
+                        <span id="btnText">展开完整路线</span>
+                        <span class="btn-icon">▼</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+        <!-- 其他 -->
+        <section id="others" class="section">
+            <h2 class="section-title">其他</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">🔧 工具</h3>
+                    <ul style="list-style: none; padding-left: 0; line-height: 2;">
+                        <li>📤 <a href="https://f.wps.cn/g/ep5IgqHt/" style="color: var(--primary-color);" target="_blank">提交处（代码、作业等）</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 创建背景粒子效果
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 150; // 背景例子数量
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                
+                // 为每个粒子添加初始位置数据
+                particle.dataset.originalX = Math.random() * window.innerWidth;
+                particle.dataset.originalY = Math.random() * window.innerHeight;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 鼠标粒子交互
+        function addParticleInteraction() {
+            const particles = document.querySelectorAll('.particle');
+            let mouseX = 0;
+            let mouseY = 0;
+            const attractionRadius = 150; // 引力作用半径
+            const maxAttraction = 0; // 最大引力强度
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                particles.forEach(particle => {
+                    const rect = particle.getBoundingClientRect();
+                    const particleX = rect.left + rect.width / 2;
+                    const particleY = rect.top + rect.height / 2;
+                    
+                    const deltaX = mouseX - particleX;
+                    const deltaY = mouseY - particleY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                    if (distance < attractionRadius) {
+                        // 计算引力强度
+                        const attractionForce = (attractionRadius - distance) / attractionRadius;
+                        const normalizedForce = attractionForce * maxAttraction;
+                        
+                        // 计算引力方向
+                        const forceX = (deltaX / distance) * normalizedForce * 100;
+                        const forceY = (deltaY / distance) * normalizedForce * 100;
+                        
+                        // 应用引力效果
+                        particle.style.transform = `translate(${forceX}px, ${forceY}px)`;
+                        
+                        // 距离越近，粒子变化越明显
+                        if (distance < 80) {
+                            particle.classList.add('hover');
+                            // 更强的视觉效果
+                            const intensity = (80 - distance) / 80;
+                            particle.style.opacity = 0.5 + intensity * 0.5;
+                            particle.style.transform += ` scale(${1 + intensity * 0.5})`;
+                        } else {
+                            particle.classList.remove('hover');
+                            particle.style.opacity = '';
+                        }
+                    } else {
+                        // 超出引力范围，恢复原状
+                        particle.classList.remove('hover');
+                        particle.style.transform = '';
+                        particle.style.opacity = '';
+                    }
+                });
+            });
+
+            // 鼠标离开页面时重置所有粒子
+            document.addEventListener('mouseleave', () => {
+                particles.forEach(particle => {
+                    particle.classList.remove('hover');
+                    particle.style.transform = '';
+                    particle.style.opacity = '';
+                });
+            });
+        }
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 高级滚动动画系统
+        function animateOnScroll() {
+            // 配置观察器选项
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            // 创建观察器
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    const element = entry.target;
+                    
+                    if (entry.isIntersecting) {
+                        // 元素进入视口，添加visible类
+                        const parent = element.parentElement;
+                        if (parent && (parent.classList.contains('grid') || parent.classList.contains('link-grid'))) {
+                            const siblings = Array.from(parent.children);
+                            const itemIndex = siblings.indexOf(element);
+                            setTimeout(() => {
+                                element.classList.add('visible');
+                            }, itemIndex * 100); // 每个项延迟100ms
+                        } 
+                        // timeline项交错动画
+                        else if (element.classList.contains('timeline-item')) {
+                            const timeline = element.parentElement;
+                            if (timeline) {
+                                const items = Array.from(timeline.querySelectorAll('.timeline-item'));
+                                const itemIndex = items.indexOf(element);
+                                setTimeout(() => {
+                                    element.classList.add('visible');
+                                }, itemIndex * 150);
+                            }
+                        }
+                        // resource-item交错动画
+                        else if (element.classList.contains('resource-item')) {
+                            const container = element.closest('.card');
+                            if (container) {
+                                const items = Array.from(container.querySelectorAll('.resource-item'));
+                                const itemIndex = items.indexOf(element);
+                                setTimeout(() => {
+                                    element.classList.add('visible');
+                                }, itemIndex * 50);
+                            }
+                        }
+                        else {
+                            // 普通元素直接添加可见类
+                            element.classList.add('visible');
+                        }
+                    } else {
+                        // 元素离开视口，移除visible类（用于重复动画）
+                        // 但保留已经完成首次动画的标记，避免重复延迟
+                        if (element.classList.contains('visible')) {
+                            element.classList.remove('visible');
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // 观察所有需要动画的元素
+            const animatedElements = document.querySelectorAll(
+                '.card, .section-title, .slide-in-left, .slide-in-right, .scale-in, .grid > *, .link-grid > *, .timeline-item, .resource-item, .notification'
+            );
+
+            animatedElements.forEach(element => {
+                observer.observe(element);
+            });
+
+            // 视差滚动效果
+            parallaxScroll();
+        }
+
+        // 视差滚动效果
+        function parallaxScroll() {
+            const hero = document.querySelector('.hero');
+            let ticking = false;
+            
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const scrolled = window.pageYOffset;
+                        
+                        // Hero区域视差效果
+                        if (hero) {
+                            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+                            hero.style.opacity = Math.max(0, 1 - (scrolled / 600));
+                        }
+
+                        // 为section-title添加轻微视差（持续效果）
+                        document.querySelectorAll('.section-title').forEach((title, index) => {
+                            const rect = title.getBoundingClientRect();
+                            const windowHeight = window.innerHeight;
+                            const elementMiddle = rect.top + rect.height / 2;
+                            
+                            // 计算元素相对于视口中心的位置（-1 到 1）
+                            const relativePos = (elementMiddle - windowHeight / 2) / (windowHeight / 2);
+                            
+                            // 根据位置计算移动量
+                            const movement = relativePos * -15;
+                            title.style.transform = `translateY(${movement}px)`;
+                        });
+
+                        // 为卡片添加持续的视差效果
+                        document.querySelectorAll('.card').forEach((card) => {
+                            const rect = card.getBoundingClientRect();
+                            const windowHeight = window.innerHeight;
+                            const elementMiddle = rect.top + rect.height / 2;
+                            
+                            // 计算元素相对于视口中心的位置
+                            const relativePos = (elementMiddle - windowHeight / 2) / (windowHeight / 2);
+                            
+                            // 根据位置计算移动量（卡片移动幅度较小）
+                            const movement = relativePos * -8;
+                            
+                            // 只在卡片可见时应用视差效果
+                            if (rect.top < windowHeight && rect.bottom > 0) {
+                                card.style.transform = `translateY(${movement}px)`;
+                            }
+                        });
+
+                        // 为timeline-item添加持续的视差效果
+                        document.querySelectorAll('.timeline-item').forEach((item) => {
+                            const rect = item.getBoundingClientRect();
+                            const windowHeight = window.innerHeight;
+                            const elementMiddle = rect.top + rect.height / 2;
+                            
+                            const relativePos = (elementMiddle - windowHeight / 2) / (windowHeight / 2);
+                            const movement = relativePos * -6;
+                            
+                            if (rect.top < windowHeight && rect.bottom > 0) {
+                                item.style.transform = `translateX(0) translateY(${movement}px)`;
+                            }
+                        });
+
+                        // 为link-item添加持续的视差效果
+                        document.querySelectorAll('.link-item').forEach((item) => {
+                            const rect = item.getBoundingClientRect();
+                            const windowHeight = window.innerHeight;
+                            const elementMiddle = rect.top + rect.height / 2;
+                            
+                            const relativePos = (elementMiddle - windowHeight / 2) / (windowHeight / 2);
+                            const movement = relativePos * -5;
+                            
+                            if (rect.top < windowHeight && rect.bottom > 0) {
+                                item.style.transform = `scale(1) translateY(${movement}px)`;
+                            }
+                        });
+
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+        }
+
+        // 鼠标移动视差效果（轻微）
+        function addMouseParallax() {
+            let rafId = null;
+            
+            document.addEventListener('mousemove', (e) => {
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                }
+                
+                rafId = requestAnimationFrame(() => {
+                    const cards = document.querySelectorAll('.card.visible');
+                    const mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                    const mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+
+                    cards.forEach((card, index) => {
+                        const speed = ((index % 3) + 1) * 2;
+                        const x = mouseX * speed;
+                        const y = mouseY * speed;
+                        
+                        // 获取当前的视差滚动transform值
+                        const currentTransform = card.style.transform || '';
+                        const translateYMatch = currentTransform.match(/translateY\(([^)]+)\)/);
+                        const currentY = translateYMatch ? translateYMatch[1] : '0px';
+                        
+                        // 组合视差滚动和鼠标移动效果
+                        card.style.transform = `translateY(${currentY}) translate(${x}px, ${y}px)`;
+                    });
+                });
+            });
+        }
+
+        // 时间轴展开/收起功能
+        function toggleTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const btnText = document.getElementById('btnText');
+            
+            if (container.classList.contains('collapsed')) {
+                // 展开
+                container.classList.remove('collapsed');
+                container.classList.add('expanded');
+                btnText.textContent = '收起路线';
+            } else {
+                // 收起
+                container.classList.remove('expanded');
+                container.classList.add('collapsed');
+                btnText.textContent = '展开完整路线';
+                
+                // 平滑滚动到学习路线标题
+                setTimeout(() => {
+                    const roadmapSection = document.getElementById('roadmap');
+                    if (roadmapSection) {
+                        roadmapSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        // 资源栏目展开/收起功能
+        function toggleResource() {
+            const container = document.getElementById('resourceContainer');
+            const btnText = document.getElementById('resourceBtnText');
+            
+            if (container.classList.contains('collapsed')) {
+                // 展开
+                container.classList.remove('collapsed');
+                container.classList.add('expanded');
+                btnText.textContent = '收起资源';
+            } else {
+                // 收起
+                container.classList.remove('expanded');
+                container.classList.add('collapsed');
+                btnText.textContent = '展开全部资源';
+                
+                // 平滑滚动到资源栏目标题
+                setTimeout(() => {
+                    const resourceSection = document.getElementById('resources');
+                    if (resourceSection) {
+                        resourceSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            createParticles();
+            addParticleInteraction();
+            animateOnScroll();
+            enhanceScrollbar();
+            addMouseParallax();
+            addEasterEggs();
+            
+            // 为logo图片添加点击事件
+            const logoImg = document.querySelector('.logo img');
+            if (logoImg) {
+                logoImg.style.cursor = 'pointer';
+                logoImg.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    alert('闲得没事点这里干啥😡');
+                });
+            }
+        });
+
+        // 添加彩蛋效果
+        function addEasterEggs() {
+            // 双击标题产生爆炸特效
+            document.querySelectorAll('.section-title').forEach(title => {
+                title.addEventListener('dblclick', (e) => {
+                    createExplosion(e.clientX, e.clientY);
+                });
+            });
+
+            // 连续点击Hero区域的特效
+            const hero = document.querySelector('.hero h1');
+            let clickCount = 0;
+            let clickTimer;
+            
+            if (hero) {
+                hero.style.cursor = 'pointer';
+                hero.addEventListener('click', () => {
+                    clickCount++;
+                    clearTimeout(clickTimer);
+                    
+                    if (clickCount >= 5) {
+                        // 触发彩蛋
+                        document.body.style.animation = 'rainbow 2s ease infinite';
+                        setTimeout(() => {
+                            document.body.style.animation = '';
+                        }, 4000);
+                        clickCount = 0;
+                    }
+                    
+                    clickTimer = setTimeout(() => {
+                        clickCount = 0;
+                    }, 2000);
+                });
+            }
+        }
+
+        // 创建爆炸粒子特效
+        function createExplosion(x, y) {
+            const colors = ['#00d4ff', '#ff00ff', '#7c3aed', '#00ff00', '#ffff00'];
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const angle = (Math.PI * 2 * i) / 20;
+                const velocity = 3 + Math.random() * 3;
+                
+                particle.style.cssText = `
+                    position: fixed;
+                    left: ${x}px;
+                    top: ${y}px;
+                    width: 8px;
+                    height: 8px;
+                    background: ${color};
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 9999;
+                    box-shadow: 0 0 10px ${color};
+                `;
+                
+                document.body.appendChild(particle);
+                
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                let posX = x;
+                let posY = y;
+                let opacity = 1;
+                let scale = 1;
+                
+                const animate = () => {
+                    posX += vx;
+                    posY += vy;
+                    opacity -= 0.02;
+                    scale -= 0.02;
+                    
+                    particle.style.left = posX + 'px';
+                    particle.style.top = posY + 'px';
+                    particle.style.opacity = opacity;
+                    particle.style.transform = `scale(${scale})`;
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        particle.remove();
+                    }
+                };
+                
+                animate();
+            }
+        }
+
+        // 添加彩虹动画样式
+        const rainbowStyle = document.createElement('style');
+        rainbowStyle.textContent = `
+            @keyframes rainbow {
+                0% { filter: hue-rotate(0deg); }
+                100% { filter: hue-rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(rainbowStyle);
+
+        // 添加导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // 背景透明度变化
+            if (scrollTop > 50) {
+                navbar.style.background = 'rgba(10, 14, 39, 0.98)';
+            } else {
+                navbar.style.background = 'rgba(10, 14, 39, 0.95)';
+            }
+        });
+
+        // 滚动条交互效果
+        function enhanceScrollbar() {
+            let scrollTimeout;
+            
+            // 滚动时添加活跃状态
+            window.addEventListener('scroll', () => {
+                document.body.classList.add('scrolling');
+                
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    document.body.classList.remove('scrolling');
+                }, 150);
+            });
+
+            // 鼠标进入滚动条区域
+            document.addEventListener('mouseenter', (e) => {
+                if (e.target === document.documentElement || e.target === document.body) {
+                    // 检查鼠标是否在滚动条区域
+                    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+                    if (e.clientX > window.innerWidth - scrollbarWidth - 20) {
+                        document.body.classList.add('scrollbar-hover');
+                    }
+                }
+            });
+
+            document.addEventListener('mouseleave', () => {
+                document.body.classList.remove('scrollbar-hover');
+            });
+        }
+
+        // 滚动条相关的CSS动画类
+        const scrollbarStyles = document.createElement('style');
+        scrollbarStyles.textContent = `
+            body.scrolling ::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, #00f0ff, #ff0080) !important;
+                box-shadow: 
+                    0 0 20px rgba(0, 212, 255, 0.8),
+                    0 0 30px rgba(255, 0, 255, 0.6) !important;
+                animation: scrollPulse 0.3s ease;
+            }
+
+            @keyframes scrollPulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+
+            body.scrollbar-hover ::-webkit-scrollbar {
+                width: 16px !important;
+            }
+
+            body.scrollbar-hover ::-webkit-scrollbar-track {
+                background: linear-gradient(180deg, rgba(10, 14, 39, 0.7), rgba(26, 31, 58, 0.8)) !important;
+                box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.2) !important;
+            }
+
+            body.scrollbar-hover ::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, #00e5ff, #ff1493, #7c3aed) !important;
+                box-shadow: 
+                    0 0 25px rgba(0, 212, 255, 0.7),
+                    0 0 35px rgba(255, 0, 255, 0.5),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.3) !important;
+            }
+        `;
+        document.head.appendChild(scrollbarStyles);
+    </script>
+</body>
+</html>

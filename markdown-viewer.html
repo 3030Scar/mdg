@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">查看详情 - 论文复现组</title>
+    <link rel="icon" type="image/png" href="./img/mdg_logo.png">
+    <link rel="shortcut icon" type="image/png" href="./img/mdg_logo.png">
+    <link rel="apple-touch-icon" href="./img/mdg_logo.png">
+    <!-- 引入KaTeX用于数学公式渲染 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- 引入marked.js用于Markdown解析 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入highlight.js用于代码高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+    <!-- 备用CDN -->
+    <script>
+        // 检查库是否加载成功,如果失败则使用备用CDN
+        window.addEventListener('DOMContentLoaded', function() {
+            // 检查marked是否加载
+            if (typeof marked === 'undefined') {
+                console.warn('marked.js主CDN加载失败,尝试备用CDN');
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/marked/marked.min.js';
+                document.head.appendChild(script);
+            }
+            
+            // 检查hljs是否加载
+            if (typeof hljs === 'undefined') {
+                console.warn('highlight.js主CDN加载失败,尝试备用CDN');
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/atom-one-dark.min.css';
+                document.head.appendChild(link);
+                
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js';
+                document.head.appendChild(script);
+            }
+            
+            // 检查KaTeX是否加载
+            setTimeout(() => {
+                if (typeof katex === 'undefined' || typeof renderMathInElement === 'undefined') {
+                    console.warn('KaTeX主CDN加载失败,尝试备用CDN');
+                    
+                    // 加载备用KaTeX CSS
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = 'https://unpkg.com/katex@0.16.9/dist/katex.min.css';
+                    document.head.appendChild(link);
+                    
+                    // 加载备用KaTeX JS
+                    const katexScript = document.createElement('script');
+                    katexScript.src = 'https://unpkg.com/katex@0.16.9/dist/katex.min.js';
+                    katexScript.onload = () => {
+                        // KaTeX主库加载完成后，加载auto-render扩展
+                        const autoRenderScript = document.createElement('script');
+                        autoRenderScript.src = 'https://unpkg.com/katex@0.16.9/dist/contrib/auto-render.min.js';
+                        document.head.appendChild(autoRenderScript);
+                        console.log('备用KaTeX加载成功');
+                    };
+                    document.head.appendChild(katexScript);
+                } else {
+                    console.log('KaTeX加载成功');
+                }
+            }, 1000);
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00d4ff;
+            --secondary-color: #ff00ff;
+            --accent-color: #7c3aed;
+            --bg-dark: #0a0e27;
+            --bg-card: rgba(20, 25, 47, 0.8);
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0e27;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 背景动画粒子 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+            opacity: 0.5;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(100vh) translateX(0);
+            }
+            to {
+                transform: translateY(-100px) translateX(100px);
+            }
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        /* iOS Safari兼容性修复 */
+        @supports not (-webkit-background-clip: text) {
+            .logo {
+                background: none;
+                color: var(--primary-color);
+                -webkit-text-fill-color: var(--primary-color);
+            }
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+            transition: all 0.3s ease;
+        }
+
+        .back-btn {
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            margin-top: 100px;
+            padding: 2rem 20px;
+            /* 最大显示宽度 */
+            max-width: 1800px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 3rem;
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        /* 大纲导航 */
+        .toc-sidebar {
+            position: sticky;
+            top: 120px;
+            width: 280px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            flex-shrink: 0;
+            background: rgba(20, 25, 47, 0.6);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.15);
+            animation: slideInLeft 0.5s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toc-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toc-title::before {
+            content: '📑';
+            font-size: 1.2rem;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc-link {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.4rem 0.6rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border-left: 2px solid transparent;
+        }
+
+        .toc-link:hover {
+            color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.1);
+            border-left-color: var(--primary-color);
+            transform: translateX(3px);
+        }
+
+        .toc-link.active {
+            color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.15);
+            border-left-color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* 不同层级的缩进 */
+        .toc-link.level-1 {
+            padding-left: 0.6rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .toc-link.level-2 {
+            padding-left: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .toc-link.level-3 {
+            padding-left: 1.8rem;
+            font-size: 0.85rem;
+        }
+
+        .toc-link.level-4 {
+            padding-left: 2.4rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        /* 大纲滚动条样式 */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.5);
+        }
+
+        /* 内容区域 */
+        .content-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            background: rgba(20, 25, 47, 0.8);
+            border-radius: 15px;
+            padding: 2.5rem 3.5rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Markdown样式 */
+        #markdown-content {
+            color: var(--text-primary);
+            text-align: left;
+        }
+
+        #markdown-content h1 {
+            font-size: 2rem;
+            margin-bottom: 1.2rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
+        }
+        
+        /* iOS Safari H1兼容性修复 */
+        @supports not (-webkit-background-clip: text) {
+            #markdown-content h1 {
+                background: none;
+                color: var(--primary-color);
+                -webkit-text-fill-color: var(--primary-color);
+            }
+        }
+
+        #markdown-content h2 {
+            font-size: 1.6rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary-color);
+            border-left: 5px solid var(--primary-color);
+            padding-left: 1rem;
+            text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
+        }
+
+        #markdown-content h3 {
+            font-size: 1.3rem;
+            margin-top: 1.6rem;
+            margin-bottom: 0.7rem;
+            color: var(--accent-color);
+            text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
+        }
+
+        #markdown-content h4 {
+            font-size: 1.1rem;
+            margin-top: 1.4rem;
+            margin-bottom: 0.6rem;
+            color: var(--secondary-color);
+            text-align: left;
+            scroll-margin-top: 120px; /* 为滚动定位添加顶部偏移,避免被导航栏遮挡 */
+        }
+
+        #markdown-content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            text-align: left;
+        }
+
+        #markdown-content ul, #markdown-content ol {
+            margin-bottom: 1.2rem;
+            padding-left: 2rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        #markdown-content li {
+            margin-bottom: 0.4rem;
+            line-height: 1.7;
+        }
+
+        #markdown-content code {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            color: var(--primary-color);
+            font-size: 0.80em;
+        }
+
+        #markdown-content pre {
+            background: rgba(10, 14, 39, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.2rem;
+            overflow-x: auto;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.1);
+        }
+
+        #markdown-content pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+            font-size: 0.8em;
+        }
+
+        #markdown-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 1.5rem;
+            margin: 1.2rem 0;
+            color: var(--text-secondary);
+            font-style: italic;
+            background: rgba(255, 0, 255, 0.05);
+            padding: 0.9rem 1.3rem;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.95rem;
+        }
+
+        #markdown-content a {
+            color: var(--primary-color);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        #markdown-content a:hover {
+            color: var(--secondary-color);
+            border-bottom-color: var(--secondary-color);
+        }
+
+        #markdown-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 1.2rem 0;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.2);
+        }
+
+        #markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2rem 0;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        #markdown-content th, #markdown-content td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        #markdown-content th {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        #markdown-content tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        #markdown-content hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), var(--secondary-color), transparent);
+            margin: 1.5rem 0;
+        }
+
+        /* 数学公式样式 */
+        #markdown-content .katex {
+            font-size: 1.05em;
+        }
+
+        #markdown-content .katex-display {
+            margin: 1.2rem 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        
+        /* 自定义数学公式容器样式 */
+        #markdown-content .math-display {
+            margin: 1.2rem 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            text-align: center;
+        }
+        
+        #markdown-content .math-inline {
+            display: inline;
+        }
+
+        /* 强调文本样式 */
+        #markdown-content strong {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        #markdown-content em {
+            color: var(--accent-color);
+            font-style: italic;
+        }
+
+        /* 任务列表样式 */
+        #markdown-content input[type="checkbox"] {
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+
+        #markdown-content ul:has(input[type="checkbox"]) {
+            list-style: none;
+            padding-left: 1.5rem;
+        }
+
+        /* 表格滚动提示 */
+        #markdown-content .table-wrapper {
+            position: relative;
+        }
+
+        #markdown-content .table-wrapper::after {
+            content: '← 滑动查看更多 →';
+            position: absolute;
+            bottom: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* 错误提示 */
+        .error {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00e5ff, #ff1493);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            /* 平板及以下隐藏大纲 */
+            .toc-sidebar {
+                display: none;
+            }
+
+            .main-content {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* 导航栏适配 */
+            .nav-container {
+                flex-direction: column;
+                gap: 0.8rem;
+                padding: 0.5rem 15px;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+                text-align: center;
+            }
+
+            .logo img {
+                width: 32px;
+                height: 32px;
+            }
+
+            .back-btn {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.85rem;
+            }
+
+            /* 主内容区适配 */
+            .main-content {
+                margin-top: 120px;
+                padding: 1.5rem 15px;
+                margin-bottom: 2rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+                border-radius: 12px;
+            }
+
+            /* Markdown内容适配 */
+            #markdown-content h1 {
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+            }
+
+            #markdown-content h2 {
+                font-size: 1.5rem;
+                margin-top: 2rem;
+                margin-bottom: 0.8rem;
+                padding-left: 0.8rem;
+            }
+
+            #markdown-content h3 {
+                font-size: 1.2rem;
+                margin-top: 1.5rem;
+            }
+
+            #markdown-content h4 {
+                font-size: 1rem;
+                margin-top: 1.2rem;
+            }
+
+            #markdown-content p {
+                font-size: 0.9rem;
+                line-height: 1.7;
+            }
+
+            #markdown-content ul, #markdown-content ol {
+                padding-left: 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            #markdown-content li {
+                margin-bottom: 0.4rem;
+            }
+
+            #markdown-content code {
+                font-size: 0.85em;
+                padding: 0.15rem 0.4rem;
+            }
+
+            #markdown-content pre {
+                padding: 1rem;
+                font-size: 0.8rem;
+                overflow-x: auto;
+            }
+
+            #markdown-content pre code {
+                font-size: 0.85em;
+            }
+
+            #markdown-content blockquote {
+                padding: 0.8rem 1rem;
+                margin: 1rem 0;
+                font-size: 0.9rem;
+            }
+
+            #markdown-content table {
+                font-size: 0.85rem;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            #markdown-content th, #markdown-content td {
+                padding: 0.7rem;
+            }
+
+            #markdown-content img {
+                margin: 1rem 0;
+            }
+
+            /* 加载和错误提示适配 */
+            .loading, .error {
+                padding: 2rem 1rem;
+                font-size: 1rem;
+            }
+
+            .error-icon {
+                font-size: 2rem;
+            }
+
+            /* 粒子效果减少 */
+            .particle {
+                display: none;
+            }
+
+            .particle:nth-child(-n+30) {
+                display: block;
+            }
+        }
+
+        /* 小屏手机适配 (< 480px) */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 1rem 10px;
+            }
+
+            .content-card {
+                padding: 1rem;
+            }
+
+            #markdown-content h1 {
+                font-size: 1.5rem;
+            }
+
+            #markdown-content h2 {
+                font-size: 1.3rem;
+            }
+
+            #markdown-content h3 {
+                font-size: 1.1rem;
+            }
+
+            #markdown-content p,
+            #markdown-content ul,
+            #markdown-content ol {
+                font-size: 0.85rem;
+            }
+
+            #markdown-content pre {
+                padding: 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                margin-top: 90px;
+            }
+
+            .nav-container {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子效果 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="./img/mdg_logo.png" alt="MDG Logo">
+                智能基座技术部 - 论文复现组
+            </a>
+            <a href="index.html#about" class="back-btn">← 返回主页</a>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <!-- 大纲导航 -->
+        <aside class="toc-sidebar" id="toc-sidebar">
+            <div class="toc-title">目录大纲</div>
+            <ul class="toc-list" id="toc-list">
+                <!-- 目录将由JavaScript动态生成 -->
+            </ul>
+        </aside>
+
+        <!-- 内容区域 -->
+        <div class="content-wrapper">
+            <div class="content-card">
+                <div id="markdown-content" class="loading">加载中</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建背景粒子效果
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 获取URL参数
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // 加载并渲染Markdown文件
+        async function loadMarkdown() {
+            const fileName = getQueryParam('file');
+            const contentDiv = document.getElementById('markdown-content');
+            
+            if (!fileName) {
+                contentDiv.innerHTML = '<div class="error"><div class="error-icon">❌</div><p>未指定文件</p></div>';
+                return;
+            }
+
+            try {
+                // 构建文件路径
+                const filePath = `./data/${fileName}.md`;
+                
+                // 获取Markdown文件
+                const response = await fetch(filePath);
+                
+                if (!response.ok) {
+                    throw new Error('文件不存在');
+                }
+                
+                const markdownText = await response.text();
+                
+                // 保护数学公式：在marked解析之前，将数学公式替换为HTML注释占位符
+                const mathBlocks = [];
+                const mathInlines = [];
+                
+                // 保护块级数学公式 ($$...$$)
+                let protectedText = markdownText.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
+                    mathBlocks.push(formula);
+                    return `<!--MATH_BLOCK_${mathBlocks.length - 1}-->`;
+                });
+                
+                // 保护行内数学公式 ($...$)
+                protectedText = protectedText.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
+                    mathInlines.push(formula);
+                    return `<!--MATH_INLINE_${mathInlines.length - 1}-->`;
+                });
+                
+                // 配置marked选项
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    highlight: function(code, lang) {
+                        // 检查hljs是否已加载
+                        if (typeof hljs !== 'undefined') {
+                            if (lang && hljs.getLanguage(lang)) {
+                                try {
+                                    return hljs.highlight(code, { language: lang }).value;
+                                } catch (err) {
+                                    console.warn('代码高亮失败:', err);
+                                }
+                            }
+                            try {
+                                return hljs.highlightAuto(code).value;
+                            } catch (err) {
+                                console.warn('自动代码高亮失败:', err);
+                            }
+                        }
+                        // 如果hljs未加载,返回原始代码
+                        return code;
+                    }
+                });
+                
+                // 修复图片路径：将 ./img/ 替换为 ./data/img/
+                const fixedMarkdownText = protectedText.replace(/!\[([^\]]*)\]\(\.\/img\//g, '![$1](./data/img/');
+                console.log('图片路径已修复');
+                
+                // 转换Markdown为HTML
+                let htmlContent = marked.parse(fixedMarkdownText);
+                
+                // 恢复数学公式 - 替换HTML注释占位符
+                htmlContent = htmlContent.replace(/<!--MATH_BLOCK_(\d+)-->/g, (match, index) => {
+                    return `$$${mathBlocks[index]}$$`;
+                });
+                
+                htmlContent = htmlContent.replace(/<!--MATH_INLINE_(\d+)-->/g, (match, index) => {
+                    return `$${mathInlines[index]}$`;
+                });
+                
+                contentDiv.innerHTML = htmlContent;
+                console.log('Markdown已转换为HTML');
+                console.log(`找到 ${mathBlocks.length} 个块级公式，${mathInlines.length} 个行内公式`);
+                
+                // 调试：显示一小段HTML内容
+                console.log('HTML片段示例:', contentDiv.innerHTML.substring(0, 500));
+                
+                // 检查图片是否加载成功
+                const images = contentDiv.querySelectorAll('img');
+                console.log(`找到 ${images.length} 张图片`);
+                images.forEach((img, index) => {
+                    console.log(`图片 ${index + 1}: ${img.src}`);
+                    img.onerror = function() {
+                        console.error(`图片加载失败: ${this.src}`);
+                    };
+                    img.onload = function() {
+                        console.log(`图片加载成功: ${this.src}`);
+                    };
+                });
+                
+                // // 更新页面标题
+                // const firstH1 = contentDiv.querySelector('h1');
+                // if (firstH1) {
+                //     document.getElementById('page-title').textContent = firstH1.textContent + ' - 论文复现组';
+                // } else {
+                //     document.getElementById('page-title').textContent = fileName + ' - 论文复现组';
+                // }
+                
+                // 为标题添加ID（用于锚点跳转）
+                addHeadingIds(contentDiv);
+                
+                // 生成目录大纲
+                generateTOC(contentDiv);
+                
+                // 代码高亮 - 增加容错处理
+                if (typeof hljs !== 'undefined') {
+                    contentDiv.querySelectorAll('pre code').forEach((block) => {
+                        try {
+                            hljs.highlightElement(block);
+                        } catch (err) {
+                            console.warn('代码块高亮失败:', err);
+                        }
+                    });
+                }
+                
+                // 渲染数学公式 - 使用KaTeX - 等待KaTeX加载完成后再渲染
+                const renderMath = () => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        try {
+                            // 使用 renderMathInElement 自动查找和渲染公式
+                            renderMathInElement(contentDiv, {
+                                delimiters: [
+                                    {left: '$$', right: '$$', display: true},
+                                    {left: '$', right: '$', display: false},
+                                    {left: '\\(', right: '\\)', display: false},
+                                    {left: '\\[', right: '\\]', display: true}
+                                ],
+                                throwOnError: false,
+                                trust: true,
+                                strict: false,
+                                fleqn: false
+                            });
+                            console.log('数学公式渲染成功');
+                            
+                            // 验证渲染结果
+                            const renderedMath = contentDiv.querySelectorAll('.katex');
+                            console.log(`成功渲染了 ${renderedMath.length} 个数学公式`);
+                        } catch (err) {
+                            console.error('数学公式渲染失败:', err);
+                        }
+                    } else {
+                        console.warn('KaTeX渲染函数未加载，等待加载...');
+                        // 如果KaTeX还未加载，等待后重试（最多重试15次）
+                        if (!renderMath.retryCount) renderMath.retryCount = 0;
+                        if (renderMath.retryCount < 15) {
+                            renderMath.retryCount++;
+                            setTimeout(renderMath, 300);
+                        } else {
+                            console.error('KaTeX加载超时，请检查网络连接');
+                        }
+                    }
+                };
+                
+                // 延迟渲染数学公式，确保DOM完全加载
+                setTimeout(renderMath, 500);
+                
+            } catch (error) {
+                console.error('加载失败:', error);
+                contentDiv.innerHTML = `
+                    <div class="error">
+                        <div class="error-icon">😕</div>
+                        <p>抱歉,无法加载文件</p>
+                        <p style="font-size: 0.9rem; margin-top: 1rem; color: var(--text-secondary);">文件: ${fileName}.md</p>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 为标题添加ID
+        function addHeadingIds(container) {
+            const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            const usedIds = new Set();
+            
+            headings.forEach((heading, index) => {
+                // 生成ID：使用标题文本，如果重复则添加数字后缀
+                let baseId = heading.textContent
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[^\u4e00-\u9fa5a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                
+                if (!baseId) {
+                    baseId = `heading-${index}`;
+                }
+                
+                let id = baseId;
+                let counter = 1;
+                while (usedIds.has(id)) {
+                    id = `${baseId}-${counter}`;
+                    counter++;
+                }
+                
+                heading.id = id;
+                usedIds.add(id);
+            });
+        }
+
+        // 生成目录大纲
+        function generateTOC(container) {
+            const headings = container.querySelectorAll('h1, h2, h3, h4');
+            const tocList = document.getElementById('toc-list');
+            const tocSidebar = document.getElementById('toc-sidebar');
+            
+            if (headings.length === 0) {
+                tocSidebar.style.display = 'none';
+                return;
+            }
+            
+            tocList.innerHTML = '';
+            
+            headings.forEach((heading) => {
+                const level = parseInt(heading.tagName.substring(1));
+                const text = heading.textContent;
+                const id = heading.id;
+                
+                const li = document.createElement('li');
+                li.className = 'toc-item';
+                
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.className = `toc-link level-${level}`;
+                a.textContent = text;
+                
+                // 点击平滑滚动
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                    // 更新活动状态
+                    document.querySelectorAll('.toc-link').forEach(link => {
+                        link.classList.remove('active');
+                    });
+                    a.classList.add('active');
+                    
+                    // 更新URL但不跳转
+                    history.pushState(null, null, `#${id}`);
+                });
+                
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+            
+            // 监听滚动，高亮当前查看的标题
+            setupScrollSpy(headings);
+        }
+
+        // 滚动监听，自动高亮当前查看的标题
+        function setupScrollSpy(headings) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        const activeLink = document.querySelector(`.toc-link[href="#${id}"]`);
+                        
+                        if (activeLink) {
+                            document.querySelectorAll('.toc-link').forEach(link => {
+                                link.classList.remove('active');
+                            });
+                            activeLink.classList.add('active');
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '-100px 0px -66%',
+                threshold: 0
+            });
+            
+            headings.forEach(heading => {
+                observer.observe(heading);
+            });
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            createParticles();
+            
+            // 确保marked库已加载
+            if (typeof marked === 'undefined') {
+                const contentDiv = document.getElementById('markdown-content');
+                contentDiv.innerHTML = `
+                    <div class="error">
+                        <div class="error-icon">⚠️</div>
+                        <p>Markdown解析库加载失败</p>
+                        <p style="font-size: 0.9rem; margin-top: 1rem; color: var(--text-secondary);">请检查网络连接或刷新页面重试</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 延迟一点时间确保所有库都加载完成（特别是KaTeX）
+            setTimeout(() => {
+                loadMarkdown();
+            }, 500);
+        });
+
+        // 添加导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(10, 14, 39, 0.98)';
+            } else {
+                navbar.style.background = 'rgba(10, 14, 39, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>
