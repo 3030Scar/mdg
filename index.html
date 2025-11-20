@@ -190,7 +190,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: gradient 3s ease infinite;
+            animation: gradient 8s ease infinite;
             background-size: 200% 200%;
         }
 
@@ -234,8 +234,9 @@
             align-items: center;
             gap: 10px;
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(20px);
+            will-change: transform, opacity;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .section-title.visible {
@@ -263,11 +264,12 @@
             position: relative;
             overflow: hidden;
             opacity: 0;
-            transform: translateY(40px);
+            transform: translateY(30px);
+            will-change: transform, opacity;
         }
 
         .card.visible {
-            animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: slideInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         @keyframes slideInUp {
@@ -280,8 +282,9 @@
         /* 从左侧滑入动画 */
         .slide-in-left {
             opacity: 0;
-            transform: translateX(-50px);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-30px);
+            will-change: transform, opacity;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .slide-in-left.visible {
@@ -292,8 +295,9 @@
         /* 从右侧滑入动画 */
         .slide-in-right {
             opacity: 0;
-            transform: translateX(50px);
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(30px);
+            will-change: transform, opacity;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .slide-in-right.visible {
@@ -316,8 +320,9 @@
         /* 网格项交错动画 */
         .grid > * {
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(20px);
+            will-change: transform, opacity;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .grid > *.visible {
@@ -386,11 +391,12 @@
             position: relative;
             gap: 1rem;
             opacity: 0;
-            transform: translateX(-20px);
+            transform: translateX(-15px);
+            will-change: transform, opacity;
         }
 
         .resource-item.visible {
-            animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation: slideInFromLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         @keyframes slideInFromLeft {
@@ -632,11 +638,12 @@
             color: var(--text-primary);
             border: 1px solid transparent;
             opacity: 0;
-            transform: scale(0.8) translateY(20px);
+            transform: scale(0.9) translateY(15px);
+            will-change: transform, opacity;
         }
 
         .link-item.visible {
-            animation: scaleInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            animation: scaleInBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         @keyframes scaleInBounce {
@@ -681,8 +688,9 @@
             border-radius: 10px;
             border-left: 3px solid var(--primary-color);
             opacity: 0;
-            transform: translateX(-30px);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-20px);
+            will-change: transform, opacity;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .timeline-item.visible {
@@ -980,8 +988,9 @@
             margin-bottom: 1rem;
             border-left: 4px solid var(--secondary-color);
             opacity: 0;
-            transform: translateX(20px);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(15px);
+            will-change: transform, opacity;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .notification.visible {
@@ -1011,375 +1020,128 @@
             }
         }
 
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            /* 导航栏适配 */
-            .nav-container {
-                flex-direction: column;
-                gap: 0.8rem;
-                padding: 0.5rem 15px;
-            }
+        /* 优化重加载动画体验 */
+        /* 当元素已经显示过一次后（data-seen="true"），它的初始隐藏状态变为“微小位移”和“半透明” */
+        /* 这样再次进入视口时，动画幅度会很小，减少视觉疲劳 */
 
-            .logo {
-                font-size: 1.1rem;
-                text-align: center;
-            }
-
-            .logo img {
-                width: 32px;
-                height: 32px;
-            }
-
-            .nav-links {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.8rem;
-                font-size: 0.85rem;
-            }
-
-            .nav-links li {
-                margin: 0;
-            }
-
-            /* Hero区域适配 */
-            .hero {
-                padding: 2rem 0;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-                margin-bottom: 0.8rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-                padding: 0 10px;
-            }
-
-            /* 主内容区适配 */
-            .main-content {
-                margin-top: 140px;
-                padding: 1.5rem 15px;
-            }
-
-            /* 标题适配 */
-            .section-title {
-                font-size: 1.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .section-title::before {
-                height: 24px;
-            }
-
-            /* 卡片适配 */
-            .card {
-                padding: 1.5rem;
-                border-radius: 12px;
-            }
-
-            .grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            /* 联系卡片适配 */
-            .contact-card {
-                flex-direction: column;
-                text-align: center;
-                padding: 1.5rem;
-            }
-
-            .contact-avatar {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
-            }
-
-            /* 资源项适配 */
-            .resource-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.8rem;
-                padding: 1rem;
-            }
-
-            .resource-item > div:first-child {
-                width: 100%;
-            }
-
-            /* 按钮始终显示在移动端 */
-            .resource-item > a.download-btn,
-            .resource-item > .download-btn {
-                opacity: 1;
-                transform: translateX(0);
-                pointer-events: auto;
-                width: 100%;
-                text-align: center;
-                padding: 0.6rem 1rem;
-            }
-
-            .download-btn {
-                font-size: 0.85rem;
-            }
-
-            /* 资源容器高度调整 */
-            .resource-container.collapsed {
-                max-height: 500px;
-            }
-
-            .resource-fade {
-                height: 150px;
-            }
-
-            /* 展开/收起按钮适配 */
-            .resource-toggle-btn,
-            .toggle-btn {
-                padding: 0.7rem 1.8rem;
-                font-size: 0.85rem;
-                letter-spacing: 1px;
-            }
-
-            .resource-toggle-btn .btn-icon,
-            .toggle-btn .btn-icon {
-                font-size: 1rem;
-            }
-
-            /* 重要网址网格适配 */
-            .link-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.8rem;
-            }
-
-            .link-item {
-                padding: 1rem;
-            }
-
-            .link-icon {
-                font-size: 1.5rem;
-            }
-
-            .link-item h4 {
-                font-size: 0.9rem;
-            }
-
-            .link-item p {
-                font-size: 0.75rem;
-            }
-
-            /* 时间轴适配 */
-            .timeline {
-                padding-left: 25px;
-            }
-
-            .timeline::before {
-                left: 5px;
-            }
-
-            .timeline-item {
-                padding: 1rem;
-                font-size: 0.9rem;
-            }
-
-            .timeline-item::before {
-                left: -32px;
-                width: 16px;
-                height: 16px;
-            }
-
-            .timeline-date {
-                font-size: 0.9rem;
-            }
-
-            .timeline-item h4 {
-                font-size: 1rem;
-            }
-
-            .timeline-item p {
-                font-size: 0.85rem;
-            }
-
-            .timeline-container.collapsed {
-                max-height: 350px;
-            }
-
-            .timeline-fade {
-                height: 150px;
-            }
-
-            /* 学期分割线适配 */
-            .semester-divider {
-                margin: 2rem 0;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .divider-line {
-                width: 100%;
-                height: 1px;
-            }
-
-            .divider-content {
-                padding: 0.8rem 1.2rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .divider-icon {
-                font-size: 1.2rem;
-            }
-
-            .semester-end,
-            .semester-start {
-                font-size: 0.85rem;
-            }
-
-            /* 通知栏适配 */
-            .notification {
-                padding: 0.8rem;
-                font-size: 0.9rem;
-            }
-
-            .notification-badge {
-                font-size: 0.75rem;
-                padding: 0.2rem 0.6rem;
-            }
-
-            /* 卡片标题适配 */
-            .card h3 {
-                font-size: 1.1rem;
-            }
-
-            .card h4 {
-                font-size: 1rem;
-            }
-
-            .card p {
-                font-size: 0.9rem;
-            }
-
-            /* 粒子效果在移动端减少数量 */
-            .particle {
-                display: none;
-            }
-
-            .particle:nth-child(-n+50) {
-                display: block;
-            }
+        /* Card */
+        .card[data-seen="true"] {
+            transform: translateY(10px);
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+        .card.visible[data-seen="true"] {
+            transform: translateY(0);
+            opacity: 1;
+            animation: none; /* 禁用 slideInUp */
         }
 
-        /* 小屏手机适配 (< 480px) */
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-
-            .section-title {
-                font-size: 1.3rem;
-            }
-
-            .card {
-                padding: 1.2rem;
-            }
-
-            .link-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .resource-toggle-btn,
-            .toggle-btn {
-                padding: 0.6rem 1.5rem;
-                font-size: 0.8rem;
-            }
-
-            .timeline {
-                padding-left: 20px;
-            }
-
-            .timeline-item {
-                padding: 0.8rem;
-            }
-
-            .divider-content {
-                font-size: 0.8rem;
-            }
+        /* Section Title */
+        .section-title[data-seen="true"] {
+            transform: translateY(5px);
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        .section-title.visible[data-seen="true"] {
+            transform: translateY(0);
+            opacity: 1;
+            animation: none;
         }
 
-        /* 横屏模式优化 */
-        @media (max-width: 768px) and (orientation: landscape) {
-            .main-content {
-                margin-top: 100px;
-            }
-
-            .hero {
-                padding: 1.5rem 0;
-            }
-
-            .nav-container {
-                flex-direction: row;
-                justify-content: space-between;
-            }
-
-            .nav-links {
-                flex-wrap: nowrap;
-                gap: 1rem;
-            }
+        /* Slide in Left */
+        .slide-in-left[data-seen="true"] {
+            transform: translateX(-10px);
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        .slide-in-left.visible[data-seen="true"] {
+            transform: translateX(0);
+            opacity: 1;
+            animation: none;
         }
 
-        /* 滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 10px;
-            transition: all 0.3s ease;
+        /* Slide in Right */
+        .slide-in-right[data-seen="true"] {
+            transform: translateX(10px);
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        .slide-in-right.visible[data-seen="true"] {
+            transform: translateX(0);
+            opacity: 1;
+            animation: none;
         }
 
-        ::-webkit-scrollbar:hover {
-            width: 14px;
+        /* Grid items */
+        .grid > *[data-seen="true"] {
+            transform: translateY(10px);
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+        .grid > *.visible[data-seen="true"] {
+            transform: translateY(0);
+            opacity: 1;
+            animation: none;
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg-dark);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            position: relative;
+        /* Timeline items */
+        .timeline-item[data-seen="true"] {
+            transform: translateX(-10px);
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        .timeline-item.visible[data-seen="true"] {
+            transform: translateX(0);
+            opacity: 1;
+            animation: none;
         }
 
-        ::-webkit-scrollbar-track:hover {
-            background: linear-gradient(180deg, rgba(10, 14, 39, 0.8), rgba(26, 31, 58, 0.9));
-            box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.1);
+        /* Resource items */
+        .resource-item[data-seen="true"] {
+            transform: translateX(-5px);
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        .resource-item.visible[data-seen="true"] {
+            transform: translateX(0);
+            opacity: 1;
+            animation: none;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-            position: relative;
+        /* Notification */
+        .notification[data-seen="true"] {
+            transform: translateX(5px);
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        .notification.visible[data-seen="true"] {
+            transform: translateX(0);
+            opacity: 1;
+            animation: none;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #00e5ff, #ff1493);
-            box-shadow: 
-                0 0 15px rgba(0, 212, 255, 0.6),
-                0 0 25px rgba(255, 0, 255, 0.4),
-                inset 0 1px 1px rgba(255, 255, 255, 0.3);
-            border: 1px solid rgba(0, 212, 255, 0.5);
-            transform: scale(1.1);
+        /* Link items */
+        .link-item[data-seen="true"] {
+            transform: scale(0.95) translateY(5px);
+            opacity: 0.5;
+            transition: all 0.5s ease;
+        }
+        .link-item.visible[data-seen="true"] {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            animation: none;
         }
 
-        ::-webkit-scrollbar-thumb:active {
-            background: linear-gradient(45deg, var(--primary-color), var(--accent-color), var(--secondary-color));
-            box-shadow: 
-                0 0 20px rgba(0, 212, 255, 0.8),
-                0 0 30px rgba(255, 0, 255, 0.6),
-                inset 0 2px 4px rgba(255, 255, 255, 0.4);
-            transform: scale(1.15);
+        /* Scale in */
+        .scale-in[data-seen="true"] {
+            transform: scale(0.95);
+            opacity: 0.5;
+            transition: all 0.5s ease;
         }
-
-        /* 滚动条角落 */
-        ::-webkit-scrollbar-corner {
-            background: var(--bg-dark);
-            border-radius: 10px;
+        .scale-in.visible[data-seen="true"] {
+            transform: scale(1);
+            opacity: 1;
+            animation: none;
         }
     </style>
 </head>
@@ -1895,47 +1657,58 @@
                     const element = entry.target;
                     
                     if (entry.isIntersecting) {
-                        // 元素进入视口，添加visible类
-                        const parent = element.parentElement;
-                        if (parent && (parent.classList.contains('grid') || parent.classList.contains('link-grid'))) {
-                            const siblings = Array.from(parent.children);
-                            const itemIndex = siblings.indexOf(element);
-                            setTimeout(() => {
+                        // 检查是否是重加载（已有 data-seen 属性）
+                        const isReload = element.dataset.seen === "true";
+
+                        if (isReload) {
+                            // 重加载时直接显示，无需延迟，配合CSS实现微小动画
+                            // 使用 requestAnimationFrame 确保 data-seen 样式生效后再添加 visible
+                            requestAnimationFrame(() => {
                                 element.classList.add('visible');
-                            }, itemIndex * 100); // 每个项延迟100ms
-                        } 
-                        // timeline项交错动画
-                        else if (element.classList.contains('timeline-item')) {
-                            const timeline = element.parentElement;
-                            if (timeline) {
-                                const items = Array.from(timeline.querySelectorAll('.timeline-item'));
-                                const itemIndex = items.indexOf(element);
+                            });
+                        } else {
+                            // 首次加载，保持原有的交错延迟逻辑
+                            const parent = element.parentElement;
+                            if (parent && (parent.classList.contains('grid') || parent.classList.contains('link-grid'))) {
+                                const siblings = Array.from(parent.children);
+                                const itemIndex = siblings.indexOf(element);
                                 setTimeout(() => {
                                     element.classList.add('visible');
-                                }, itemIndex * 150);
+                                }, itemIndex * 100); // 每个项延迟100ms
+                            } 
+                            // timeline项交错动画
+                            else if (element.classList.contains('timeline-item')) {
+                                const timeline = element.parentElement;
+                                if (timeline) {
+                                    const items = Array.from(timeline.querySelectorAll('.timeline-item'));
+                                    const itemIndex = items.indexOf(element);
+                                    setTimeout(() => {
+                                        element.classList.add('visible');
+                                    }, itemIndex * 150);
+                                }
                             }
-                        }
-                        // resource-item交错动画
-                        else if (element.classList.contains('resource-item')) {
-                            const container = element.closest('.card');
-                            if (container) {
-                                const items = Array.from(container.querySelectorAll('.resource-item'));
-                                const itemIndex = items.indexOf(element);
-                                setTimeout(() => {
-                                    element.classList.add('visible');
-                                }, itemIndex * 50);
+                            // resource-item交错动画
+                            else if (element.classList.contains('resource-item')) {
+                                const container = element.closest('.card');
+                                if (container) {
+                                    const items = Array.from(container.querySelectorAll('.resource-item'));
+                                    const itemIndex = items.indexOf(element);
+                                    setTimeout(() => {
+                                        element.classList.add('visible');
+                                    }, itemIndex * 50);
+                                }
                             }
-                        }
-                        else {
-                            // 普通元素直接添加可见类
-                            element.classList.add('visible');
+                            else {
+                                // 普通元素直接添加可见类
+                                element.classList.add('visible');
+                            }
+                            
+                            // 标记为已见过，下次进入时将使用微小动画
+                            element.dataset.seen = "true";
                         }
                     } else {
-                        // 元素离开视口，移除visible类（用于重复动画）
-                        // 但保留已经完成首次动画的标记，避免重复延迟
-                        if (element.classList.contains('visible')) {
-                            element.classList.remove('visible');
-                        }
+                        // 元素离开视口，移除visible类
+                        element.classList.remove('visible');
                     }
                 });
             }, observerOptions);
