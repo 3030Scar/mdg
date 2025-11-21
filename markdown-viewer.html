@@ -145,6 +145,14 @@
             top: 0;
             z-index: 1000;
             border-bottom: 1px solid var(--border-color);
+            transition: transform 0.3s ease, background 0.3s ease, visibility 0.3s;
+            will-change: transform;
+            transform: translateZ(0); /* 开启硬件加速，修复移动端backdrop-filter渲染问题 */
+        }
+
+        .navbar.hidden {
+            transform: translateY(-100%);
+            visibility: hidden; /* 隐藏后完全移除渲染，避免残影 */
         }
 
         .nav-container {
@@ -188,22 +196,29 @@
         }
 
         .back-btn {
-            padding: 0.7rem 1.5rem;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            border: none;
+            padding: 0.6rem 1.4rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
             border-radius: 25px;
-            color: white;
+            color: var(--primary-color);
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            display: inline-block;
-            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
             font-weight: bold;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
 
         .back-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+            background: var(--primary-color);
+            color: #0a0e27;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+            border-color: transparent;
         }
 
         /* 主要内容区 */
@@ -1271,14 +1286,30 @@
             }, 500);
         });
 
-        // 添加导航栏滚动效果
+        // 添加导航栏滚动效果 (自动隐藏/显示)
+        let lastScrollTop = 0;
+        const navbar = document.querySelector('.navbar');
+        
         window.addEventListener('scroll', () => {
-            const navbar = document.querySelector('.navbar');
-            if (window.scrollY > 50) {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // 背景透明度变化
+            if (scrollTop > 50) {
                 navbar.style.background = 'rgba(10, 14, 39, 0.98)';
             } else {
                 navbar.style.background = 'rgba(10, 14, 39, 0.95)';
             }
+            
+            // 自动隐藏/显示逻辑
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // 向下滚动且不在顶部时隐藏
+                navbar.classList.add('hidden');
+            } else {
+                // 向上滚动时显示
+                navbar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
         });
     </script>
 </body>
