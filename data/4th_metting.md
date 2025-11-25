@@ -15,7 +15,10 @@
 - 自定义模型类，继承自nn.Module，实现__init__()和forward()方法
 - 使用自己写的脚本处理后的数据作为模型输入
 - 建议把预处理脚本及模型代码分为两个.py文件
+
   [MNIST数据集下载](https://usertshu.github.io/papersreplication.github.io/files/MNIST.zip)
+
+- 提交至[论文复现提交处](https://f.wps.cn/g/ep5IgqHt/)，上传代号备注004
 
 **什么是数据读取/预处理？**
 

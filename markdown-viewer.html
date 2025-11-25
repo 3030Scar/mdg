@@ -8,14 +8,14 @@
     <link rel="shortcut icon" type="image/png" href="./img/mdg_logo.png">
     <link rel="apple-touch-icon" href="./img/mdg_logo.png">
     <!-- 引入KaTeX用于数学公式渲染 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" media="print" onload="this.media='all'">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <!-- 引入marked.js用于Markdown解析 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- 引入highlight.js用于代码高亮 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css" media="print" onload="this.media='all'">
+    <script defer src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
     <!-- 备用CDN -->
     <script>
         // 检查库是否加载成功,如果失败则使用备用CDN
@@ -251,6 +251,21 @@
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 5px 20px rgba(0, 212, 255, 0.15);
             animation: slideInLeft 0.5s ease;
+            transition: top 0.3s ease, max-height 0.3s ease, width 0.3s ease, padding 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+        }
+
+        .toc-sidebar.moved-up {
+            top: 20px;
+            max-height: calc(100vh - 40px);
+        }
+        
+        .toc-sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            opacity: 0;
+            margin-right: -2rem; /* 抵消gap间距 */
+            border: none;
+            pointer-events: none;
         }
 
         @keyframes slideInLeft {
@@ -264,13 +279,19 @@
             }
         }
 
+        .toc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
         .toc-title {
             font-size: 1.1rem;
             font-weight: bold;
             color: var(--primary-color);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--border-color);
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -279,6 +300,66 @@
         .toc-title::before {
             content: '📑';
             font-size: 1.2rem;
+        }
+        
+        .toc-collapse-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toc-collapse-btn:hover {
+            color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .toc-expand-btn {
+            position: fixed;
+            left: 30px;
+            top: 120px;
+            z-index: 90;
+            background: rgba(20, 25, 47, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50px);
+        }
+
+        .toc-expand-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+        
+        .toc-expand-btn.moved-up {
+            top: 20px;
+        }
+
+        .toc-expand-btn:hover {
+            background: var(--primary-color);
+            color: #0a0e27;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
         }
 
         .toc-list {
@@ -475,21 +556,95 @@
             font-size: 0.80em;
         }
 
-        #markdown-content pre {
-            background: rgba(10, 14, 39, 0.9);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1.2rem;
-            overflow-x: auto;
+        /* 代码块容器 */
+        .code-block-wrapper {
             margin-bottom: 1.2rem;
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #060816; /* 深邃的午夜蓝，与整体风格更搭 */
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.05);
+            transition: all 0.3s ease;
         }
 
-        #markdown-content pre code {
+        .code-block-wrapper:hover {
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .code-lang {
+            font-weight: bold;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .code-btn {
             background: transparent;
-            padding: 0;
-            color: inherit;
-            font-size: 0.8em;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .code-btn:hover {
+            color: var(--primary-color);
+            background: rgba(0, 212, 255, 0.15);
+        }
+
+        /* 覆盖原有的 pre 样式 */
+        #markdown-content pre {
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            background: transparent;
+            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+            max-height: 3000px; /* 足够大的高度 */
+            opacity: 1;
+            overflow: hidden; /* 配合 max-height 实现动画 */
+        }
+        
+        /* 折叠状态 */
+        #markdown-content pre.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin: 0;
+            border: none;
+        }
+        
+        .collapse-icon {
+            display: inline-block;
+            transition: transform 0.3s ease;
         }
 
         #markdown-content blockquote {
@@ -518,10 +673,84 @@
 
         #markdown-content img {
             max-width: 100%;
+            max-height: 40vh; /* 限制最大高度为视口高度的40% */
+            width: auto; /* 保持宽高比 */
             height: auto;
+            display: block; /* 块级显示以便居中 */
+            margin: 1.5rem auto; /* 水平居中 */
             border-radius: 10px;
-            margin: 1.2rem 0;
             box-shadow: 0 5px 20px rgba(0, 212, 255, 0.2);
+            cursor: zoom-in; /* 鼠标悬停显示放大图标 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #markdown-content img:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        /* 图片灯箱效果 */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            object-fit: contain;
+        }
+
+        .lightbox.active img {
+            transform: scale(1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            font-size: 2rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            line-height: 1;
+            padding: 0;
+        }
+        
+        .lightbox-close:hover {
+            background: var(--primary-color);
+            color: #0a0e27;
+            transform: rotate(90deg);
         }
 
         #markdown-content table {
@@ -926,9 +1155,19 @@
 
     <!-- 主要内容 -->
     <div class="main-content">
+        <!-- 展开按钮 -->
+        <button id="toc-expand-btn" class="toc-expand-btn" onclick="toggleTOC()" title="展开大纲">
+            📑
+        </button>
+
         <!-- 大纲导航 -->
         <aside class="toc-sidebar" id="toc-sidebar">
-            <div class="toc-title">目录大纲</div>
+            <div class="toc-header">
+                <div class="toc-title">目录大纲</div>
+                <button class="toc-collapse-btn" onclick="toggleTOC()" title="收起侧边栏">
+                    ◀
+                </button>
+            </div>
             <ul class="toc-list" id="toc-list">
                 <!-- 目录将由JavaScript动态生成 -->
             </ul>
@@ -956,6 +1195,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- 图片灯箱 -->
+    <div id="image-lightbox" class="lightbox">
+        <button class="lightbox-close" title="关闭">&times;</button>
+        <img id="lightbox-img" src="" alt="Full size image">
     </div>
 
     <script>
@@ -1045,7 +1290,10 @@
                 });
                 
                 // 修复图片路径：将 ./img/ 替换为 ./data/img/
-                const fixedMarkdownText = protectedText.replace(/!\[([^\]]*)\]\(\.\/img\//g, '![$1](./data/img/');
+                // 同时修复图片路径末尾多余的斜杠 (例如 .png/)
+                const fixedMarkdownText = protectedText
+                    .replace(/!\[([^\]]*)\]\(\.\/img\//g, '![$1](./data/img/')
+                    .replace(/(\.(?:png|jpg|jpeg|gif|svg|webp))\/(\s*\))/gi, '$1$2');
                 console.log('图片路径已修复');
                 
                 // 转换Markdown为HTML
@@ -1061,6 +1309,13 @@
                 });
                 
                 contentDiv.innerHTML = htmlContent;
+                
+                // 设置图片灯箱
+                setupImageLightbox(contentDiv);
+                
+                // 增强代码块显示
+                enhanceCodeBlocks(contentDiv);
+
                 console.log('Markdown已转换为HTML');
                 console.log(`找到 ${mathBlocks.length} 个块级公式，${mathInlines.length} 个行内公式`);
                 
@@ -1159,6 +1414,160 @@
             }
         }
 
+        // 增强代码块显示（复制、折叠）
+        function enhanceCodeBlocks(container) {
+            const pres = container.querySelectorAll('pre');
+            
+            pres.forEach(pre => {
+                // 避免重复处理
+                if (pre.parentElement.classList.contains('code-block-wrapper')) return;
+                
+                const code = pre.querySelector('code');
+                if (!code) return;
+                
+                // 获取语言
+                let lang = 'TEXT';
+                code.classList.forEach(cls => {
+                    if (cls.startsWith('language-')) {
+                        lang = cls.replace('language-', '').toUpperCase();
+                    }
+                });
+                
+                // 创建容器
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-block-wrapper';
+                
+                // 创建头部
+                const header = document.createElement('div');
+                header.className = 'code-header';
+                
+                // 语言标签
+                const langSpan = document.createElement('span');
+                langSpan.className = 'code-lang';
+                langSpan.innerHTML = `<span style="opacity:0.7">&lt;/&gt;</span> ${lang}`;
+                
+                // 操作区
+                const actions = document.createElement('div');
+                actions.className = 'code-actions';
+                
+                // 复制按钮
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'code-btn copy-btn';
+                copyBtn.title = '复制代码';
+                copyBtn.innerHTML = '📋 复制';
+                
+                copyBtn.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(code.innerText);
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '✅ 已复制';
+                        copyBtn.style.color = '#00ff87';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                            copyBtn.style.color = '';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('复制失败:', err);
+                        copyBtn.innerHTML = '❌ 失败';
+                    }
+                });
+                
+                // 折叠按钮
+                const collapseBtn = document.createElement('button');
+                collapseBtn.className = 'code-btn collapse-btn';
+                collapseBtn.title = '折叠/展开';
+                collapseBtn.innerHTML = '<span class="collapse-icon">▼</span>';
+                
+                // 切换折叠状态函数
+                const toggleCollapse = (forceCollapse) => {
+                    const isCollapsed = forceCollapse !== undefined ? forceCollapse : !pre.classList.contains('collapsed');
+                    
+                    if (isCollapsed) {
+                        pre.classList.add('collapsed');
+                        collapseBtn.innerHTML = '<span class="collapse-icon" style="transform: rotate(-90deg)">▼</span>';
+                        collapseBtn.title = '展开';
+                    } else {
+                        pre.classList.remove('collapsed');
+                        collapseBtn.innerHTML = '<span class="collapse-icon">▼</span>';
+                        collapseBtn.title = '折叠';
+                    }
+                };
+                
+                collapseBtn.addEventListener('click', () => toggleCollapse());
+                
+                // 智能折叠检测：如果代码超过一定行数，默认折叠
+                const codeText = code.innerText;
+                const lineCount = codeText.split('\n').length;
+                
+                // 如果超过20行则折叠
+                if (lineCount > 20) {
+                    toggleCollapse(true);
+                }                // 组装
+                actions.appendChild(copyBtn);
+                actions.appendChild(collapseBtn);
+                header.appendChild(langSpan);
+                header.appendChild(actions);
+                
+                // 插入 DOM
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(header);
+                wrapper.appendChild(pre);
+            });
+        }
+
+        // 设置图片灯箱效果
+        function setupImageLightbox(container) {
+            const images = container.querySelectorAll('img');
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+            
+            if (!lightbox || !lightboxImg) return;
+            
+            // 打开灯箱
+            images.forEach(img => {
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => {
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt || 'Image';
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // 禁止背景滚动
+                });
+            });
+            
+            // 关闭灯箱函数
+            const closeLightbox = () => {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = ''; // 恢复背景滚动
+                // 延迟清空src，避免关闭动画时图片突然消失
+                setTimeout(() => {
+                    lightboxImg.src = '';
+                }, 300);
+            };
+            
+            // 点击关闭按钮
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeLightbox();
+                });
+            }
+            
+            // 点击背景关闭
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+            
+            // ESC键关闭
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                    closeLightbox();
+                }
+            });
+        }
+
         // 为标题添加ID
         function addHeadingIds(container) {
             const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -1239,28 +1648,107 @@
 
         // 滚动监听，自动高亮当前查看的标题
         function setupScrollSpy(headings) {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.id;
-                        const activeLink = document.querySelector(`.toc-link[href="#${id}"]`);
-                        
-                        if (activeLink) {
-                            document.querySelectorAll('.toc-link').forEach(link => {
-                                link.classList.remove('active');
-                            });
-                            activeLink.classList.add('active');
-                        }
+            // 转换为数组以便操作
+            const headingsArray = Array.from(headings);
+            const tocSidebar = document.getElementById('toc-sidebar');
+            
+            // 侧边栏自动滚动函数
+            const scrollToActiveLink = (element) => {
+                if (!element || !tocSidebar) return;
+
+                const containerRect = tocSidebar.getBoundingClientRect();
+                const elementRect = element.getBoundingClientRect();
+                
+                // 检查元素是否在容器的可视区域内（预留一些边距）
+                const relativeTop = elementRect.top - containerRect.top;
+                const relativeBottom = elementRect.bottom - containerRect.top;
+                
+                // 判断是否完全可见（上下各留20px缓冲）
+                const isVisible = (
+                    relativeTop >= 20 && 
+                    relativeBottom <= tocSidebar.clientHeight - 20
+                );
+
+                if (!isVisible) {
+                    // 计算目标滚动位置：将元素置于容器中间
+                    // 公式：当前scrollTop + 元素相对视口顶部距离 - 容器高度一半 + 元素高度一半
+                    const targetScrollTop = tocSidebar.scrollTop + relativeTop - (tocSidebar.clientHeight / 2) + (elementRect.height / 2);
+                    
+                    tocSidebar.scrollTo({
+                        top: targetScrollTop,
+                        behavior: 'smooth'
+                    });
+                }
+            };
+
+            // 滚动处理函数
+            const onScroll = () => {
+                // 获取当前滚动位置
+                // 添加偏移量：导航栏高度 + 额外缓冲，确保标题进入视口一定距离后才激活
+                const scrollPosition = (window.pageYOffset || document.documentElement.scrollTop) + 150;
+                
+                // 找到当前所在的章节
+                // 逻辑：找到最后一个 offsetTop 小于等于当前滚动位置的标题
+                let currentId = '';
+                
+                for (let i = 0; i < headingsArray.length; i++) {
+                    const heading = headingsArray[i];
+                    if (heading.offsetTop <= scrollPosition) {
+                        currentId = heading.id;
+                    } else {
+                        // 因为标题是按顺序排列的，一旦找到大于的，后面的肯定也大于（除非布局很奇怪），可以提前退出
+                        break;
                     }
-                });
-            }, {
-                rootMargin: '-100px 0px -66%',
-                threshold: 0
+                }
+                
+                // 特殊处理：如果滚动到底部，强制激活最后一个标题
+                // 避免因为页面底部空间不足导致最后一个标题无法滚动到触发位置
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+                    if (headingsArray.length > 0) {
+                        currentId = headingsArray[headingsArray.length - 1].id;
+                    }
+                }
+
+                // 如果没有找到符合条件的（比如在页面最顶部），且有标题，则激活第一个
+                if (!currentId && headingsArray.length > 0 && window.scrollY < 100) {
+                    currentId = headingsArray[0].id;
+                }
+
+                // 更新高亮状态
+                if (currentId) {
+                    const activeLink = document.querySelector(`.toc-link[href="#${currentId}"]`);
+                    const currentActive = document.querySelector('.toc-link.active');
+                    
+                    // 只有当激活项改变时才更新DOM
+                    if (activeLink && activeLink !== currentActive) {
+                        // 移除旧的激活状态
+                        if (currentActive) {
+                            currentActive.classList.remove('active');
+                        }
+                        
+                        // 添加新的激活状态
+                        activeLink.classList.add('active');
+                        
+                        // 自动滚动侧边栏
+                        scrollToActiveLink(activeLink);
+                    }
+                }
+            };
+
+            // 使用 requestAnimationFrame 进行节流优化
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        onScroll();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
             });
             
-            headings.forEach(heading => {
-                observer.observe(heading);
-            });
+            // 初始化执行一次
+            onScroll();
         }
 
         // 初始化
@@ -1289,6 +1777,8 @@
         // 添加导航栏滚动效果 (自动隐藏/显示)
         let lastScrollTop = 0;
         const navbar = document.querySelector('.navbar');
+        const tocSidebarElement = document.getElementById('toc-sidebar');
+        const tocExpandBtn = document.getElementById('toc-expand-btn');
         
         window.addEventListener('scroll', () => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -1304,13 +1794,33 @@
             if (scrollTop > lastScrollTop && scrollTop > 100) {
                 // 向下滚动且不在顶部时隐藏
                 navbar.classList.add('hidden');
+                if (tocSidebarElement) tocSidebarElement.classList.add('moved-up');
+                if (tocExpandBtn) tocExpandBtn.classList.add('moved-up');
             } else {
                 // 向上滚动时显示
                 navbar.classList.remove('hidden');
+                if (tocSidebarElement) tocSidebarElement.classList.remove('moved-up');
+                if (tocExpandBtn) tocExpandBtn.classList.remove('moved-up');
             }
             
             lastScrollTop = scrollTop;
         });
+
+        // 切换大纲侧边栏显示/隐藏
+        function toggleTOC() {
+            const sidebar = document.getElementById('toc-sidebar');
+            const expandBtn = document.getElementById('toc-expand-btn');
+            
+            if (sidebar.classList.contains('collapsed')) {
+                // 展开
+                sidebar.classList.remove('collapsed');
+                expandBtn.classList.remove('visible');
+            } else {
+                // 收起
+                sidebar.classList.add('collapsed');
+                expandBtn.classList.add('visible');
+            }
+        }
     </script>
 </body>
 </html>

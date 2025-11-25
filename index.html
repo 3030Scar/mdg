@@ -1183,13 +1183,6 @@
             <h2 class="section-title">最新通知</h2>
             <div class="card">
                 <div class="notification">
-                    <span class="notification-badge">重要</span>
-                    <strong>加入智能基座社团</strong>
-                    <p style="margin-top: 0.5rem;">请大家登陆社团网站注册账号【重点：用户名请实名，用自己的名字】，注册完成后请在个人页面的“一句话简介”里面写上自己的title，如“活动部成员”，认证那里可以使用校园卡，完成后大家在群里接龙~</p>
-                    <p style="margin-top: 0.5rem;"><a href="https://mdg-papergroup-1382022823.cos.ap-guangzhou.myqcloud.com/%E6%99%BA%E8%83%BD%E5%9F%BA%E5%BA%A7%E7%A4%BE%E5%9B%A2%E5%8A%A0%E5%85%A5%E6%8C%87%E5%8D%97.pdf" style="color: var(--primary-color);" target="_blank">下载社团加入指南</a>，并跟随指引操作</p>
-                    <p style="margin-top: 0.5rem;">你可以<a href="https://edu.hicomputing.huawei.com/zh/group" style="color: var(--primary-color);" target="_blank">点这里</a>查看社团网站</p> 
-                </div>
-                <div class="notification">
                     <span class="notification-badge">可选作业</span>
                     <strong>论文复现组测试题</strong>
                     <ul style="list-style: none; padding-left: 0; line-height: 2;">
@@ -1211,6 +1204,7 @@
                         <li>要求1：自定义模型类，继承自nn.Module，实现__init__()和forward()方法</li>
                         <li>要求2：使用自己写的脚本处理后的数据作为模型输入</li>
                         <li>要求3：建议把预处理脚本及模型代码分为两个.py文件</li>
+                        <li><strong>提交至</strong><a href="https://f.wps.cn/g/ep5IgqHt/" style="color: var(--primary-color);" target="_blank">论文复现提交处</a>，代号备注004</li>
                         <li><a href="https://usertshu.github.io/papersreplication.github.io/files/MNIST.zip" style="color: var(--primary-color);" target="_blank">MNIST数据集下载</a></li>
                         <li>任务详细内容可进入<a href="markdown-viewer.html?file=4th_metting" style="color: var(--primary-color);">第三次分享会回顾笔记</a>查看</li>
                     </ul>
@@ -1429,7 +1423,7 @@
                     </ul>
                 </div>
                 <div class="card">
-                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年11月2日</h3>
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">📅 2025年11月9日</h3>
                     <h4>主题：论文复现组第三次分享会</h4><br>
                     <ul style="list-style: none; padding-left: 0;">
                         <li>📝 <a href="markdown-viewer.html?file=4th_metting" style="color: var(--primary-color);">查看详细</a></li>
@@ -1830,12 +1824,12 @@
                 // 展开
                 container.classList.remove('collapsed');
                 container.classList.add('expanded');
-                btnText.innerHTML = '收起路线 <span class="btn-icon">▼</span>';
+                btnText.textContent = '收起路线';
             } else {
                 // 收起
                 container.classList.remove('expanded');
                 container.classList.add('collapsed');
-                btnText.innerHTML = '展开完整路线 <span class="btn-icon">▼</span>';
+                btnText.textContent = '展开完整路线';
                 
                 // 平滑滚动到学习路线标题
                 setTimeout(() => {
@@ -1859,12 +1853,12 @@
                 // 展开
                 container.classList.remove('collapsed');
                 container.classList.add('expanded');
-                btnText.innerHTML = '收起资源 <span class="btn-icon">▼</span>';
+                btnText.textContent = '收起资源';
             } else {
                 // 收起
                 container.classList.remove('expanded');
                 container.classList.add('collapsed');
-                btnText.innerHTML = '展开全部资源 <span class="btn-icon">▼</span>';
+                btnText.textContent = '展开全部资源';
                 
                 // 平滑滚动到资源栏目标题
                 setTimeout(() => {
