@@ -1776,12 +1776,19 @@
 
         // 添加导航栏滚动效果 (自动隐藏/显示)
         let lastScrollTop = 0;
+        let scrollAccumulator = 0; // 累积滚动距离
+        let isNavbarHidden = false;
         const navbar = document.querySelector('.navbar');
         const tocSidebarElement = document.getElementById('toc-sidebar');
         const tocExpandBtn = document.getElementById('toc-expand-btn');
         
+        // 滚动阈值配置
+        const SCROLL_THRESHOLD_HIDE = 30;  // 向下滚动多少像素后隐藏
+        const SCROLL_THRESHOLD_SHOW = 80;  // 向上滚动多少像素后显示（更大的值 = 更不敏感）
+        
         window.addEventListener('scroll', () => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollDelta = scrollTop - lastScrollTop;
             
             // 背景透明度变化
             if (scrollTop > 50) {
@@ -1790,17 +1797,43 @@
                 navbar.style.background = 'rgba(10, 14, 39, 0.95)';
             }
             
-            // 自动隐藏/显示逻辑
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // 向下滚动且不在顶部时隐藏
+            // 在页面顶部时始终显示
+            if (scrollTop <= 100) {
+                scrollAccumulator = 0;
+                if (isNavbarHidden) {
+                    isNavbarHidden = false;
+                    navbar.classList.remove('hidden');
+                    if (tocSidebarElement) tocSidebarElement.classList.remove('moved-up');
+                    if (tocExpandBtn) tocExpandBtn.classList.remove('moved-up');
+                }
+                lastScrollTop = scrollTop;
+                return;
+            }
+            
+            // 累积滚动距离
+            if (scrollDelta > 0) {
+                // 向下滚动：累加正值
+                scrollAccumulator = Math.max(0, scrollAccumulator + scrollDelta);
+            } else {
+                // 向上滚动：累加负值
+                scrollAccumulator = Math.min(0, scrollAccumulator + scrollDelta);
+            }
+            
+            // 自动隐藏/显示逻辑（带阈值）
+            if (!isNavbarHidden && scrollAccumulator > SCROLL_THRESHOLD_HIDE) {
+                // 累积向下滚动超过阈值，隐藏顶栏
+                isNavbarHidden = true;
                 navbar.classList.add('hidden');
                 if (tocSidebarElement) tocSidebarElement.classList.add('moved-up');
                 if (tocExpandBtn) tocExpandBtn.classList.add('moved-up');
-            } else {
-                // 向上滚动时显示
+                scrollAccumulator = 0; // 重置累积值
+            } else if (isNavbarHidden && scrollAccumulator < -SCROLL_THRESHOLD_SHOW) {
+                // 累积向上滚动超过阈值，显示顶栏
+                isNavbarHidden = false;
                 navbar.classList.remove('hidden');
                 if (tocSidebarElement) tocSidebarElement.classList.remove('moved-up');
                 if (tocExpandBtn) tocExpandBtn.classList.remove('moved-up');
+                scrollAccumulator = 0; // 重置累积值
             }
             
             lastScrollTop = scrollTop;
