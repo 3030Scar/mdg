@@ -369,11 +369,53 @@
         }
 
         .toc-item {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        /* 可折叠的大纲项容器 */
+        .toc-item-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* 展开/折叠按钮 */
+        .toc-toggle {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.7rem;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        .toc-toggle:hover {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--primary-color);
+            opacity: 1;
+        }
+
+        .toc-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        /* 没有子项时的占位符 */
+        .toc-toggle-placeholder {
+            width: 18px;
+            flex-shrink: 0;
         }
 
         .toc-link {
             display: block;
+            flex: 1;
             color: var(--text-secondary);
             text-decoration: none;
             padding: 0.4rem 0.6rem;
@@ -388,7 +430,6 @@
             color: var(--primary-color);
             background: rgba(0, 212, 255, 0.1);
             border-left-color: var(--primary-color);
-            transform: translateX(3px);
         }
 
         .toc-link.active {
@@ -398,28 +439,67 @@
             font-weight: bold;
         }
 
-        /* 不同层级的缩进 */
+        /* 子级列表 */
+        .toc-children {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            padding-left: 0.8rem;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
+        }
+
+        .toc-children.expanded {
+            max-height: 2000px;
+            opacity: 1;
+            margin-top: 0.3rem;
+        }
+
+        /* 自动展开的样式（区分手动和自动） */
+        .toc-children.auto-expanded {
+            max-height: 2000px;
+            opacity: 1;
+            margin-top: 0.3rem;
+        }
+
+        /* 不同层级的样式 */
         .toc-link.level-1 {
-            padding-left: 0.6rem;
             font-size: 0.95rem;
             font-weight: 600;
         }
 
         .toc-link.level-2 {
-            padding-left: 1.2rem;
             font-size: 0.9rem;
         }
 
         .toc-link.level-3 {
-            padding-left: 1.8rem;
             font-size: 0.85rem;
         }
 
         .toc-link.level-4 {
-            padding-left: 2.4rem;
             font-size: 0.8rem;
             color: var(--text-secondary);
             opacity: 0.8;
+        }
+
+        /* TOC中的数学公式样式 */
+        .toc-link .katex {
+            font-size: 0.9em;
+        }
+
+        .toc-link.level-1 .katex {
+            font-size: 0.95em;
+        }
+
+        .toc-link.level-2 .katex {
+            font-size: 0.9em;
+        }
+
+        .toc-link.level-3 .katex,
+        .toc-link.level-4 .katex {
+            font-size: 0.85em;
         }
 
         /* 大纲滚动条样式 */
@@ -1382,6 +1462,9 @@
                             // 验证渲染结果
                             const renderedMath = contentDiv.querySelectorAll('.katex');
                             console.log(`成功渲染了 ${renderedMath.length} 个数学公式`);
+                            
+                            // 更新TOC中的标题（复制已渲染的数学公式）
+                            updateTocWithRenderedMath(contentDiv);
                         } catch (err) {
                             console.error('数学公式渲染失败:', err);
                         }
@@ -1597,7 +1680,27 @@
             });
         }
 
-        // 生成目录大纲
+        // 更新TOC中的标题，使其包含已渲染的数学公式
+        function updateTocWithRenderedMath(container) {
+            const headings = container.querySelectorAll('h1, h2, h3, h4');
+            
+            headings.forEach(heading => {
+                // 检查标题中是否有已渲染的KaTeX公式
+                if (heading.querySelector('.katex')) {
+                    const headingId = heading.id;
+                    const tocLink = document.querySelector(`.toc-link[data-heading-id="${headingId}"]`);
+                    
+                    if (tocLink) {
+                        // 复制标题的innerHTML到TOC链接
+                        tocLink.innerHTML = heading.innerHTML;
+                    }
+                }
+            });
+            
+            console.log('TOC标题数学公式已更新');
+        }
+
+        // 生成目录大纲（层级嵌套结构）
         function generateTOC(container) {
             const headings = container.querySelectorAll('h1, h2, h3, h4');
             const tocList = document.getElementById('toc-list');
@@ -1610,23 +1713,105 @@
             
             tocList.innerHTML = '';
             
+            // 构建层级结构
+            const tocData = [];
+            let currentH1 = null;
+            let currentH2 = null;
+            let currentH3 = null;
+            
             headings.forEach((heading) => {
                 const level = parseInt(heading.tagName.substring(1));
-                const text = heading.textContent;
-                const id = heading.id;
+                const item = {
+                    heading: heading,
+                    level: level,
+                    text: heading.textContent,
+                    id: heading.id,
+                    children: []
+                };
                 
+                if (level === 1) {
+                    tocData.push(item);
+                    currentH1 = item;
+                    currentH2 = null;
+                    currentH3 = null;
+                } else if (level === 2) {
+                    if (currentH1) {
+                        currentH1.children.push(item);
+                    } else {
+                        tocData.push(item);
+                    }
+                    currentH2 = item;
+                    currentH3 = null;
+                } else if (level === 3) {
+                    if (currentH2) {
+                        currentH2.children.push(item);
+                    } else if (currentH1) {
+                        currentH1.children.push(item);
+                    } else {
+                        tocData.push(item);
+                    }
+                    currentH3 = item;
+                } else if (level === 4) {
+                    if (currentH3) {
+                        currentH3.children.push(item);
+                    } else if (currentH2) {
+                        currentH2.children.push(item);
+                    } else if (currentH1) {
+                        currentH1.children.push(item);
+                    } else {
+                        tocData.push(item);
+                    }
+                }
+            });
+            
+            // 递归创建DOM元素
+            function createTocItem(item) {
                 const li = document.createElement('li');
                 li.className = 'toc-item';
+                li.dataset.headingId = item.id;
                 
+                const wrapper = document.createElement('div');
+                wrapper.className = 'toc-item-wrapper';
+                
+                // 展开/折叠按钮
+                if (item.children.length > 0) {
+                    const toggle = document.createElement('button');
+                    toggle.className = 'toc-toggle';
+                    toggle.innerHTML = '▶';
+                    toggle.title = '展开/折叠';
+                    toggle.dataset.headingId = item.id;
+                    
+                    toggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleTocItem(li, true); // true 表示手动操作
+                    });
+                    
+                    wrapper.appendChild(toggle);
+                } else {
+                    const placeholder = document.createElement('span');
+                    placeholder.className = 'toc-toggle-placeholder';
+                    wrapper.appendChild(placeholder);
+                }
+                
+                // 链接
                 const a = document.createElement('a');
-                a.href = `#${id}`;
-                a.className = `toc-link level-${level}`;
-                a.textContent = text;
+                a.href = `#${item.id}`;
+                a.className = `toc-link level-${item.level}`;
+                a.dataset.headingId = item.id;
+                
+                // 复制标题的 innerHTML 以保留数学公式渲染
+                // 如果标题中有已渲染的 KaTeX，直接复制
+                if (item.heading.querySelector('.katex')) {
+                    a.innerHTML = item.heading.innerHTML;
+                } else {
+                    // 否则使用纯文本，稍后会被渲染
+                    a.textContent = item.text;
+                }
                 
                 // 点击平滑滚动
                 a.addEventListener('click', (e) => {
                     e.preventDefault();
-                    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    item.heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     
                     // 更新活动状态
                     document.querySelectorAll('.toc-link').forEach(link => {
@@ -1634,16 +1819,97 @@
                     });
                     a.classList.add('active');
                     
+                    // 如果有子项，手动展开
+                    if (item.children.length > 0) {
+                        toggleTocItem(li, true, true); // 强制展开
+                    }
+                    
                     // 更新URL但不跳转
-                    history.pushState(null, null, `#${id}`);
+                    history.pushState(null, null, `#${item.id}`);
                 });
                 
-                li.appendChild(a);
-                tocList.appendChild(li);
+                wrapper.appendChild(a);
+                li.appendChild(wrapper);
+                
+                // 子级列表
+                if (item.children.length > 0) {
+                    const childList = document.createElement('ul');
+                    childList.className = 'toc-children';
+                    
+                    item.children.forEach(child => {
+                        childList.appendChild(createTocItem(child));
+                    });
+                    
+                    li.appendChild(childList);
+                }
+                
+                return li;
+            }
+            
+            // 创建所有顶级项
+            tocData.forEach(item => {
+                tocList.appendChild(createTocItem(item));
             });
             
             // 监听滚动，高亮当前查看的标题
             setupScrollSpy(headings);
+        }
+        
+        // 切换大纲项的展开/折叠状态
+        function toggleTocItem(li, isManual, forceExpand) {
+            const childList = li.querySelector(':scope > .toc-children');
+            const toggle = li.querySelector(':scope > .toc-item-wrapper > .toc-toggle');
+            
+            if (!childList) return;
+            
+            const isExpanded = childList.classList.contains('expanded') || childList.classList.contains('auto-expanded');
+            
+            if (forceExpand || !isExpanded) {
+                // 展开
+                childList.classList.remove('auto-expanded');
+                childList.classList.add('expanded');
+                if (isManual) {
+                    childList.dataset.manualExpanded = 'true';
+                }
+                if (toggle) toggle.classList.add('expanded');
+            } else {
+                // 折叠
+                childList.classList.remove('expanded', 'auto-expanded');
+                delete childList.dataset.manualExpanded;
+                if (toggle) toggle.classList.remove('expanded');
+            }
+        }
+        
+        // 自动展开大纲项（用于滚动监听）
+        function autoExpandTocItem(li) {
+            const childList = li.querySelector(':scope > .toc-children');
+            const toggle = li.querySelector(':scope > .toc-item-wrapper > .toc-toggle');
+            
+            if (!childList) return;
+            
+            // 如果已经手动展开，不处理
+            if (childList.dataset.manualExpanded === 'true') return;
+            
+            if (!childList.classList.contains('expanded') && !childList.classList.contains('auto-expanded')) {
+                childList.classList.add('auto-expanded');
+                if (toggle) toggle.classList.add('expanded');
+            }
+        }
+        
+        // 自动收起大纲项（用于滚动离开时）
+        function autoCollapseTocItem(li) {
+            const childList = li.querySelector(':scope > .toc-children');
+            const toggle = li.querySelector(':scope > .toc-item-wrapper > .toc-toggle');
+            
+            if (!childList) return;
+            
+            // 如果是手动展开的，不自动收起
+            if (childList.dataset.manualExpanded === 'true') return;
+            
+            if (childList.classList.contains('auto-expanded')) {
+                childList.classList.remove('auto-expanded');
+                if (toggle) toggle.classList.remove('expanded');
+            }
         }
 
         // 滚动监听，自动高亮当前查看的标题
@@ -1651,6 +1917,11 @@
             // 转换为数组以便操作
             const headingsArray = Array.from(headings);
             const tocSidebar = document.getElementById('toc-sidebar');
+            
+            // 记录上一次激活的标题ID，用于检测变化
+            let lastActiveId = '';
+            // 记录自动展开的项，用于离开时收起
+            let autoExpandedItems = new Set();
             
             // 侧边栏自动滚动函数
             const scrollToActiveLink = (element) => {
@@ -1671,7 +1942,6 @@
 
                 if (!isVisible) {
                     // 计算目标滚动位置：将元素置于容器中间
-                    // 公式：当前scrollTop + 元素相对视口顶部距离 - 容器高度一半 + 元素高度一半
                     const targetScrollTop = tocSidebar.scrollTop + relativeTop - (tocSidebar.clientHeight / 2) + (elementRect.height / 2);
                     
                     tocSidebar.scrollTo({
@@ -1680,15 +1950,33 @@
                     });
                 }
             };
+            
+            // 获取标题的所有父级标题ID
+            const getParentHeadingIds = (headingId) => {
+                const parentIds = [];
+                const tocItem = document.querySelector(`.toc-item[data-heading-id="${headingId}"]`);
+                if (!tocItem) return parentIds;
+                
+                let parent = tocItem.parentElement;
+                while (parent) {
+                    if (parent.classList.contains('toc-children')) {
+                        const parentItem = parent.closest('.toc-item');
+                        if (parentItem && parentItem.dataset.headingId) {
+                            parentIds.push(parentItem.dataset.headingId);
+                        }
+                    }
+                    parent = parent.parentElement;
+                }
+                
+                return parentIds;
+            };
 
             // 滚动处理函数
             const onScroll = () => {
                 // 获取当前滚动位置
-                // 添加偏移量：导航栏高度 + 额外缓冲，确保标题进入视口一定距离后才激活
                 const scrollPosition = (window.pageYOffset || document.documentElement.scrollTop) + 150;
                 
                 // 找到当前所在的章节
-                // 逻辑：找到最后一个 offsetTop 小于等于当前滚动位置的标题
                 let currentId = '';
                 
                 for (let i = 0; i < headingsArray.length; i++) {
@@ -1696,31 +1984,28 @@
                     if (heading.offsetTop <= scrollPosition) {
                         currentId = heading.id;
                     } else {
-                        // 因为标题是按顺序排列的，一旦找到大于的，后面的肯定也大于（除非布局很奇怪），可以提前退出
                         break;
                     }
                 }
                 
                 // 特殊处理：如果滚动到底部，强制激活最后一个标题
-                // 避免因为页面底部空间不足导致最后一个标题无法滚动到触发位置
                 if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
                     if (headingsArray.length > 0) {
                         currentId = headingsArray[headingsArray.length - 1].id;
                     }
                 }
 
-                // 如果没有找到符合条件的（比如在页面最顶部），且有标题，则激活第一个
+                // 如果没有找到符合条件的，且有标题，则激活第一个
                 if (!currentId && headingsArray.length > 0 && window.scrollY < 100) {
                     currentId = headingsArray[0].id;
                 }
 
-                // 更新高亮状态
-                if (currentId) {
-                    const activeLink = document.querySelector(`.toc-link[href="#${currentId}"]`);
+                // 更新高亮状态和展开状态
+                if (currentId && currentId !== lastActiveId) {
+                    const activeLink = document.querySelector(`.toc-link[data-heading-id="${currentId}"]`);
                     const currentActive = document.querySelector('.toc-link.active');
                     
-                    // 只有当激活项改变时才更新DOM
-                    if (activeLink && activeLink !== currentActive) {
+                    if (activeLink) {
                         // 移除旧的激活状态
                         if (currentActive) {
                             currentActive.classList.remove('active');
@@ -1729,8 +2014,41 @@
                         // 添加新的激活状态
                         activeLink.classList.add('active');
                         
+                        // 获取当前标题需要展开的所有父级
+                        const parentIds = getParentHeadingIds(currentId);
+                        const currentItemsToExpand = new Set(parentIds);
+                        
+                        // 当前标题本身如果有子项，也自动展开
+                        const currentTocItem = document.querySelector(`.toc-item[data-heading-id="${currentId}"]`);
+                        if (currentTocItem && currentTocItem.querySelector(':scope > .toc-children')) {
+                            currentItemsToExpand.add(currentId);
+                        }
+                        
+                        // 收起不再需要的自动展开项
+                        autoExpandedItems.forEach(itemId => {
+                            if (!currentItemsToExpand.has(itemId)) {
+                                const li = document.querySelector(`.toc-item[data-heading-id="${itemId}"]`);
+                                if (li) {
+                                    autoCollapseTocItem(li);
+                                }
+                            }
+                        });
+                        
+                        // 展开需要的项
+                        currentItemsToExpand.forEach(itemId => {
+                            const li = document.querySelector(`.toc-item[data-heading-id="${itemId}"]`);
+                            if (li) {
+                                autoExpandTocItem(li);
+                            }
+                        });
+                        
+                        // 更新自动展开记录
+                        autoExpandedItems = currentItemsToExpand;
+                        
                         // 自动滚动侧边栏
                         scrollToActiveLink(activeLink);
+                        
+                        lastActiveId = currentId;
                     }
                 }
             };
