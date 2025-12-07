@@ -304,6 +304,7 @@ Y = linear2(H)  # 也就是 H x W2.T
 * **原理** ：
   * 这强迫模型不能依赖某几个特定的神经元（因为它们随时可能“下班”）。
   * **本质** ：Dropout 实际上是一种 **低成本的集成学习** 。每一次 Iteration，我们都在训练一个不同的“残缺网络”，最终测试时，相当于把这些网络的智慧平均了起来。
+> Dropout不改变神经网络的结构，只有在训练过程中才会启用Dropout，测试时神经网络会恢复为全连接状态
 
 3. **结构优化（小卷积核技巧）** ：
 
@@ -450,15 +451,92 @@ Loss 曲线不下降，而是忽高忽低，或者在一个数值附近剧烈波
 
 * **禁忌** ：**绝对不能全设为 0！**
 * 如果 $W$ 全是 0，所有神经元进行的运算都一样，梯度的更新也一样。这会导致几百个神经元退化成一个神经元（对称性难题）。
-* **科学设定** ：
+* **科学设定：随机初始化** ：
+> 定义：权重值从某个概率分布（如均匀分布、正态分布）中随机采样得到，而非固定为某个常数（如全 0、全 1）或按固定规则确定性生成。
 * **Xavier 初始化** ：适用于 **Sigmoid** 或  **Tanh** 。它保证了输出和输入的方差一致。
   * 公式：$W \sim \mathcal{N}\left(0, \frac{2}{n_{in} + n_{out}}\right)$ 或 $W \sim U\left(-\sqrt{\frac{6}{n_{in}+n_{out}}}, \sqrt{\frac{6}{n_{in}+n_{out}}}\right)$
   * 其中 $n_{in}$ 是输入神经元数，$n_{out}$ 是输出神经元数。
-* **He 初始化** ：专为 **ReLU** 设计。因为 ReLU 会把负值砍掉（变为0），信号量减半，所以 He 初始化让方差扩大了两倍来保持信号强度。
+* **Kaiming 初始化** ：专为 **ReLU** 设计。因为 ReLU 会把负值砍掉（变为0），信号量减半，所以 He 初始化让方差扩大了两倍来保持信号强度。
   * 公式：$W \sim \mathcal{N}\left(0, \frac{2}{n_{in}}\right)$
   * 注意分母只有 $n_{in}$，且分子是 2（对比 Xavier 的 $\frac{2}{n_{in}+n_{out}}$）。
-* **初始化陷阱** ：如果初始化不当（比如偏负），配合 ReLU（x<0 时梯度为 0），会导致神经元永久“死亡” (Dead ReLU)。
-* **迁移学习 (Transfer Learning)** ：站在巨人的肩膀上。比如 VGG，可以使用在大规模数据集（ImageNet）上预训练好的权重作为初始值，这比随机初始化强得多。
+* **初始化陷阱** ：如果初始化不当（比如偏负），配合 ReLU（x<0 时梯度为 0），会导致神经元永久"死亡" (Dead ReLU)。
+
+**Xavier 初始化示例代码（适用于 Sigmoid/Tanh）：**
+```python
+import torch
+import torch.nn as nn
+
+# 定义一个使用 Tanh 激活函数的简单网络
+class XavierNet(nn.Module):
+    def __init__(self):
+        super(XavierNet, self).__init__()
+        self.fc1 = nn.Linear(10, 20)  # 输入10个特征，输出20个特征
+        self.fc2 = nn.Linear(20, 30)
+        self.fc3 = nn.Linear(30, 1)
+        
+        # Xavier 初始化
+        # PyTorch 提供了两种方式
+        nn.init.xavier_uniform_(self.fc1.weight)  # 均匀分布
+        nn.init.xavier_normal_(self.fc2.weight)   # 正态分布
+        nn.init.xavier_uniform_(self.fc3.weight)
+        
+        # 偏置项通常初始化为0
+        nn.init.zeros_(self.fc1.bias)
+        nn.init.zeros_(self.fc2.bias)
+        nn.init.zeros_(self.fc3.bias)
+    
+    def forward(self, x):
+        x = torch.tanh(self.fc1(x))  # 使用 Tanh 激活函数
+        x = torch.tanh(self.fc2(x))
+        x = self.fc3(x)
+        return x
+```
+**Kaiming (He) 初始化示例代码（适用于 ReLU）：**
+```python
+import torch
+import torch.nn as nn
+
+# 定义一个使用 ReLU 激活函数的简单网络
+class KaimingNet(nn.Module):
+    def __init__(self):
+        super(KaimingNet, self).__init__()
+        self.fc1 = nn.Linear(10, 20)
+        self.fc2 = nn.Linear(20, 30)
+        self.fc3 = nn.Linear(30, 1)
+        
+        # Kaiming 初始化（也叫 He 初始化）
+        # mode='fan_in' 使用输入神经元数 n_in
+        # nonlinearity='relu' 指定为 ReLU 激活函数
+        nn.init.kaiming_uniform_(self.fc1.weight, mode='fan_in', nonlinearity='relu')
+        nn.init.kaiming_normal_(self.fc2.weight, mode='fan_in', nonlinearity='relu')
+        nn.init.kaiming_uniform_(self.fc3.weight, mode='fan_in', nonlinearity='relu')
+        
+        # 偏置项初始化为0
+        nn.init.zeros_(self.fc1.bias)
+        nn.init.zeros_(self.fc2.bias)
+        nn.init.zeros_(self.fc3.bias)
+    
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))  # 使用 ReLU 激活函数
+        x = torch.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+```
+
+* **迁移学习 (Transfer Learning)** ：站在巨人的肩膀上
+  * **核心思想**：不从零开始，而是使用在大规模数据集上已经训练好的浅层模型权重作为初始值。
+  * **为什么有效**：
+    * 深度神经网络的浅层（靠近输入的层）通常学习的是**通用特征**（如边缘、纹理、颜色），这些特征在不同任务之间是共享的。
+    * 深层（靠近输出的层）学习的是**任务特定特征**（如"猫的耳朵"、"狗的鼻子"），需要针对具体任务调整。
+  * **典型应用场景**：
+    * 比如 VGG、ResNet 等经典模型在 ImageNet（包含 1400 万张图片，1000 个类别）上预训练。
+    * 当你要做一个只有几千张图片的猫狗分类任务时，可以：
+      1. **冻结浅层**：保持前几层的权重不变（因为边缘检测器对猫狗都有用）
+      2. **微调深层**：只训练后面几层，让它学习"猫"和"狗"的特定特征
+      3. **替换输出层**：把原来 1000 类的输出层换成 2 类（猫/狗）
+  * **优势对比**：
+    * **随机初始化**：需要大量数据和时间才能让浅层学会提取基础特征
+    * **迁移学习**：浅层特征已经学好了，只需少量数据微调深层，训练速度快 10-100 倍，效果还更好
 
 ### 6. 寻找最优解：超参数搜索
 
